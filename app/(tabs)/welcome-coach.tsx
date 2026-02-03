@@ -5,8 +5,7 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  Animated,
-  Dimensions 
+  Animated 
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,9 +17,6 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import { POSITIONS } from '@/constants/positions';
 import { TRAINING_GOALS } from '@/constants/skills';
 import { getRecommendedDrills, Drill } from '@/mocks/drills';
-import DrillCard from '@/components/DrillCard';
-
-const { width } = Dimensions.get('window');
 
 export default function WelcomeCoachScreen() {
   const router = useRouter();
@@ -83,7 +79,7 @@ export default function WelcomeCoachScreen() {
     }, 25);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [fadeAnim, scaleAnim, slideAnim, welcomeMessage]);
 
   const handleDismiss = async () => {
     await updateProfile({ hasSeenWelcome: true } as any);

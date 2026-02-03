@@ -239,7 +239,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   });
 
   const customerInfo = customerInfoQuery.data as CustomerInfo | null;
-  const isPro = customerInfo?.entitlements.active['pro'] !== undefined;
+  const isPro = customerInfo?.entitlements.active['Ronaldify Pro'] !== undefined;
 
   const currentOffering = offeringsQuery.data?.current;
   
@@ -278,7 +278,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const restorePurchases = useCallback(async (): Promise<boolean> => {
     try {
       const info = await restoreMutateAsync();
-      return info.entitlements.active['pro'] !== undefined;
+      return info.entitlements.active['Ronaldify Pro'] !== undefined;
     } catch {
       return false;
     }

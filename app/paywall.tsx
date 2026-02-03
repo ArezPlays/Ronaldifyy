@@ -45,6 +45,12 @@ function getPackageSavingsKey(packageType: string): 'popular' | 'bestValue' | nu
   return null;
 }
 
+function getPackageBadgeText(packageType: string): string | null {
+  if (packageType === '$rc_monthly') return 'MOST POPULAR';
+  if (packageType === '$rc_annual') return 'SAVE 50%';
+  return null;
+}
+
 export default function PaywallScreen() {
   const { 
     packages, 
@@ -194,7 +200,7 @@ export default function PaywallScreen() {
               {packages.map((pkg) => {
                 const isSelected = selectedPackage?.identifier === pkg.identifier;
                 const label = getPackageLabel(pkg.packageType);
-                const savings = getPackageSavings(pkg.packageType);
+                const badgeText = getPackageBadgeText(pkg.packageType);
                 
                 return (
                   <TouchableOpacity
@@ -207,12 +213,12 @@ export default function PaywallScreen() {
                     disabled={isProcessing}
                     activeOpacity={0.7}
                   >
-                    {savings && (
+                    {badgeText && (
                       <View style={[
                         dynamicStyles.savingsBadge,
-                        savings === t.bestValue && dynamicStyles.savingsBadgeBest
+                        pkg.packageType === '$rc_annual' && dynamicStyles.savingsBadgeBest
                       ]}>
-                        <Text style={dynamicStyles.savingsBadgeText}>{savings}</Text>
+                        <Text style={dynamicStyles.savingsBadgeText}>{badgeText}</Text>
                       </View>
                     )}
                     
@@ -429,20 +435,26 @@ const createDynamicStyles = (colors: any) => StyleSheet.create({
   },
   savingsBadge: {
     position: 'absolute',
-    top: -10,
+    top: -12,
     right: 16,
     backgroundColor: colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   savingsBadgeBest: {
-    backgroundColor: colors.accent,
+    backgroundColor: '#FF6B35',
   },
   savingsBadgeText: {
-    fontSize: 11,
-    fontWeight: '700' as const,
-    color: colors.black,
+    fontSize: 10,
+    fontWeight: '800' as const,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   packageContent: {
     flexDirection: 'row',

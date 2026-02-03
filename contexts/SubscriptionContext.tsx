@@ -44,25 +44,12 @@ export interface SubscriptionPackage {
 
 const NOTIFIED_TRANSACTIONS_KEY = '@ronaldify_notified_transactions';
 
-const PLAN_PRICES: Record<string, { amount: string; type: 'weekly' | 'monthly' | 'yearly' }> = {
-  '$rc_weekly': { amount: '$5', type: 'weekly' },
-  '$rc_monthly': { amount: '$9.99', type: 'monthly' },
-  '$rc_annual': { amount: '$70', type: 'yearly' },
+const PLAN_PRICES: Record<string, { amount: string; type: 'monthly' | 'yearly' }> = {
+  '$rc_monthly': { amount: '$5', type: 'monthly' },
+  '$rc_annual': { amount: '$30', type: 'yearly' },
 };
 
 const MOCK_PACKAGES: SubscriptionPackage[] = [
-  {
-    identifier: 'ronaldify_weekly',
-    packageType: '$rc_weekly',
-    product: {
-      identifier: 'ronaldify_weekly',
-      title: 'Weekly Pro',
-      description: 'Billed weekly',
-      priceString: '$4.99',
-      price: 4.99,
-    },
-    rcPackage: null as unknown as PurchasesPackage,
-  },
   {
     identifier: 'ronaldify_monthly',
     packageType: '$rc_monthly',
@@ -70,8 +57,8 @@ const MOCK_PACKAGES: SubscriptionPackage[] = [
       identifier: 'ronaldify_monthly',
       title: 'Monthly Pro',
       description: 'Billed monthly',
-      priceString: '$9.99',
-      price: 9.99,
+      priceString: '$5.00',
+      price: 5,
     },
     rcPackage: null as unknown as PurchasesPackage,
   },
@@ -81,9 +68,9 @@ const MOCK_PACKAGES: SubscriptionPackage[] = [
     product: {
       identifier: 'ronaldify_yearly',
       title: 'Yearly Pro',
-      description: 'Billed annually',
-      priceString: '$49.99',
-      price: 49.99,
+      description: 'Billed annually - Save 50%',
+      priceString: '$30.00',
+      price: 30,
     },
     rcPackage: null as unknown as PurchasesPackage,
   },
@@ -273,7 +260,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const displayPackages = hasRealPackages ? packages : MOCK_PACKAGES;
   
   const sortedPackages = [...displayPackages].sort((a, b) => {
-    const order: Record<string, number> = { '$rc_weekly': 0, '$rc_monthly': 1, '$rc_annual': 2 };
+    const order: Record<string, number> = { '$rc_monthly': 0, '$rc_annual': 1 };
     return (order[a.packageType] ?? 99) - (order[b.packageType] ?? 99);
   });
 

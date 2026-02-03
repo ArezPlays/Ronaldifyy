@@ -56,8 +56,8 @@ const MOCK_PACKAGES: SubscriptionPackage[] = [
     packageType: '$rc_weekly',
     product: {
       identifier: 'ronaldify_weekly',
-      title: 'Weekly Pro',
-      description: 'Billed weekly',
+      title: 'Weekly',
+      description: '$4.99/week',
       priceString: '$4.99',
       price: 4.99,
     },
@@ -68,8 +68,8 @@ const MOCK_PACKAGES: SubscriptionPackage[] = [
     packageType: '$rc_monthly',
     product: {
       identifier: 'ronaldify_monthly',
-      title: 'Monthly Pro',
-      description: 'Billed monthly',
+      title: 'Monthly',
+      description: '$9.99/month',
       priceString: '$9.99',
       price: 9.99,
     },
@@ -80,8 +80,8 @@ const MOCK_PACKAGES: SubscriptionPackage[] = [
     packageType: '$rc_annual',
     product: {
       identifier: 'ronaldify_yearly',
-      title: 'Yearly Pro',
-      description: 'Billed annually - Best Value!',
+      title: 'Yearly',
+      description: '$59.99/year',
       priceString: '$59.99',
       price: 59.99,
     },

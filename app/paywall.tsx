@@ -32,6 +32,10 @@ function getPackageLabelKey(packageType: string): 'weekly' | 'monthly' | 'yearly
   if (packageType === '$rc_weekly') return 'weekly';
   if (packageType === '$rc_monthly') return 'monthly';
   if (packageType === '$rc_annual') return 'yearly';
+  // Fallback based on identifier substring
+  const lower = packageType.toLowerCase();
+  if (lower.includes('week')) return 'weekly';
+  if (lower.includes('year') || lower.includes('annual')) return 'yearly';
   return 'monthly';
 }
 
@@ -223,7 +227,7 @@ export default function PaywallScreen() {
                       <View style={dynamicStyles.packageInfo}>
                         <Text style={dynamicStyles.packageLabel}>{label}</Text>
                         <Text style={dynamicStyles.packageDescription}>
-                          {pkg.product.description || label}
+                          {pkg.product.priceString}/{label === t.weekly ? 'week' : label === t.yearly ? 'year' : 'month'}
                         </Text>
                       </View>
                       

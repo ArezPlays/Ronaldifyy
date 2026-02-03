@@ -68,6 +68,16 @@ type TranslationKeys = {
   upgrade: string;
   restorePurchases: string;
   tryFree: string;
+  lvl: string;
+  drillsWord: string;
+  levels: string;
+  unlock: string;
+  xpProgress: string;
+  xpToLevel: string;
+  totalXp: string;
+  drillsDone: string;
+  champion: string;
+  min: string;
   
   // Home screen
   goodMorning: string;
@@ -89,6 +99,9 @@ type TranslationKeys = {
   unlockPotential: string;
   aiVideoAnalysis: string;
   aiTip: string;
+  yourSkills: string;
+  drillsCompleted: string;
+  startWorkout: string;
   
   // Drills screen
   aiRecommended: string;
@@ -109,9 +122,23 @@ type TranslationKeys = {
   easy: string;
   medium: string;
   hard: string;
+  elite: string;
   done: string;
   unlockMoreDrills: string;
   goPro: string;
+  skillMastery: string;
+  progressThroughLevels: string;
+  randomWorkout: string;
+  mixedSkills: string;
+  startRandomWorkout: string;
+  levelComplete: string;
+  xpEarned: string;
+  continueTraining: string;
+  unlockAllProDrills: string;
+  eliteSkillsAdvanced: string;
+  yourJourney: string;
+  completeAllDrillsEarn: string;
+  drillsInThisLevel: string;
   
   // Profile screen
   editProfile: string;
@@ -148,6 +175,45 @@ type TranslationKeys = {
   analyzeVideo: string;
   processing: string;
   selectVideo: string;
+  proFeature: string;
+  proFeatureDesc: string;
+  permissionRequired: string;
+  grantAccessMedia: string;
+  uploading: string;
+  analyzing: string;
+  coachAnalysis: string;
+  whatsWorking: string;
+  workOnThis: string;
+  performanceRatings: string;
+  coachTips: string;
+  recommendedTraining: string;
+  tapToStartTraining: string;
+  startTrainingArrow: string;
+  yourAnalyses: string;
+  whatWeAnalyze: string;
+  howItWorks: string;
+  upload: string;
+  improve: string;
+  important: string;
+  uploadDesc: string;
+  analyzeDesc: string;
+  improveDesc: string;
+  importantDesc: string;
+  unlockVideoAnalysis: string;
+  getAiFeedback: string;
+  analysisFailed: string;
+  tryAgain: string;
+  uploadingVideo: string;
+  processingFrames: string;
+  aiAnalyzing: string;
+  positioning: string;
+  movement: string;
+  dribblingMastery: string;
+  shootingMastery: string;
+  passingMastery: string;
+  speedTraining: string;
+  defensiveSkills: string;
+  fitnessProgram: string;
   
   // Auth
   welcomeBack: string;
@@ -282,6 +348,16 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     upgrade: 'Upgrade',
     restorePurchases: 'Restore Purchases',
     tryFree: 'Try Free for 3 Days',
+    lvl: 'Lvl',
+    drillsWord: 'drills',
+    levels: 'levels',
+    unlock: 'Unlock',
+    xpProgress: 'XP Progress',
+    xpToLevel: 'XP to Level',
+    totalXp: 'Total XP',
+    drillsDone: 'Drills Done',
+    champion: 'Champion',
+    min: 'min',
     
     // Home screen
     goodMorning: 'Good morning',
@@ -303,6 +379,9 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     unlockPotential: 'Unlock Your Full Potential',
     aiVideoAnalysis: 'AI video analysis • Advanced drills • Personal coaching',
     aiTip: 'AI Tip',
+    yourSkills: 'Your Skills',
+    drillsCompleted: 'drills completed',
+    startWorkout: 'Start Workout',
     
     // Drills screen
     aiRecommended: 'AI Recommended',
@@ -323,9 +402,23 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     easy: 'Easy',
     medium: 'Medium',
     hard: 'Hard',
+    elite: 'Elite',
     done: 'Done',
     unlockMoreDrills: 'Unlock more pro drills',
     goPro: 'Go Pro',
+    skillMastery: 'Skill Mastery',
+    progressThroughLevels: 'Progress through levels',
+    randomWorkout: 'RANDOM WORKOUT',
+    mixedSkills: 'Mixed skills',
+    startRandomWorkout: 'Start Random Workout',
+    levelComplete: 'Level Complete!',
+    xpEarned: 'XP Earned!',
+    continueTraining: 'Continue Training',
+    unlockAllProDrills: 'Unlock All Pro Drills',
+    eliteSkillsAdvanced: 'Elite skills & advanced training',
+    yourJourney: 'Your Journey',
+    completeAllDrillsEarn: 'Complete all drills to earn',
+    drillsInThisLevel: 'Drills in this level',
     
     // Profile screen
     editProfile: 'Edit Profile',
@@ -362,6 +455,45 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     analyzeVideo: 'Analyze Video',
     processing: 'Processing...',
     selectVideo: 'Select a video to analyze',
+    proFeature: 'Pro Feature',
+    proFeatureDesc: 'Video analysis is a Pro feature. Upgrade to unlock AI-powered analysis of your football clips.',
+    permissionRequired: 'Permission Required',
+    grantAccessMedia: 'Please grant access to your media library to upload videos.',
+    uploading: 'Uploading...',
+    analyzing: 'Analyzing...',
+    coachAnalysis: 'Coach Analysis',
+    whatsWorking: "What's Working",
+    workOnThis: 'Work On This',
+    performanceRatings: 'Performance Ratings',
+    coachTips: "Coach's Tips",
+    recommendedTraining: 'Recommended Training',
+    tapToStartTraining: 'Tap to start your training journey',
+    startTrainingArrow: 'Start training →',
+    yourAnalyses: 'Your Analyses',
+    whatWeAnalyze: 'What We Analyze',
+    howItWorks: 'How It Works',
+    upload: 'Upload',
+    improve: 'Improve',
+    important: 'Important',
+    uploadDesc: 'Record or select a video from your gallery (up to 60 seconds)',
+    analyzeDesc: 'Our AI reviews your technique, movement, and positioning',
+    improveDesc: 'Get personalized tips and drills added to your training plan',
+    importantDesc: 'Only upload football-related clips. Otherwise, the AI may provide incorrect analysis.',
+    unlockVideoAnalysis: 'Unlock Video Analysis',
+    getAiFeedback: 'Get AI-powered feedback on your technique',
+    analysisFailed: 'Analysis Failed',
+    tryAgain: 'Try Again',
+    uploadingVideo: 'Uploading video...',
+    processingFrames: 'Processing frames...',
+    aiAnalyzing: 'AI analyzing technique...',
+    positioning: 'Positioning',
+    movement: 'Movement',
+    dribblingMastery: 'Dribbling Mastery',
+    shootingMastery: 'Shooting Mastery',
+    passingMastery: 'Passing Mastery',
+    speedTraining: 'Speed Training',
+    defensiveSkills: 'Defensive Skills',
+    fitnessProgram: 'Fitness Program',
     
     // Auth
     welcomeBack: 'Welcome Back',
@@ -493,6 +625,16 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     upgrade: 'ترقية',
     restorePurchases: 'استعادة المشتريات',
     tryFree: 'جرب مجاناً لمدة 3 أيام',
+    lvl: 'مستوى',
+    drillsWord: 'تمارين',
+    levels: 'مستويات',
+    unlock: 'فتح',
+    xpProgress: 'تقدم XP',
+    xpToLevel: 'XP للمستوى',
+    totalXp: 'إجمالي XP',
+    drillsDone: 'تمارين مكتملة',
+    champion: 'بطل',
+    min: 'دقيقة',
     
     // Home screen
     goodMorning: 'صباح الخير',
@@ -514,6 +656,9 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     unlockPotential: 'أطلق العنان لإمكاناتك الكاملة',
     aiVideoAnalysis: 'تحليل فيديو بالذكاء الاصطناعي • تدريبات متقدمة • تدريب شخصي',
     aiTip: 'نصيحة ذكية',
+    yourSkills: 'مهاراتك',
+    drillsCompleted: 'تمارين مكتملة',
+    startWorkout: 'بدء التمرين',
     
     // Drills screen
     aiRecommended: 'موصى به بالذكاء الاصطناعي',
@@ -534,9 +679,23 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     easy: 'سهل',
     medium: 'متوسط',
     hard: 'صعب',
+    elite: 'نخبة',
     done: 'تم',
     unlockMoreDrills: 'افتح المزيد من التدريبات',
     goPro: 'اشترك في برو',
+    skillMastery: 'إتقان المهارات',
+    progressThroughLevels: 'التقدم عبر المستويات',
+    randomWorkout: 'تمرين عشوائي',
+    mixedSkills: 'مهارات متنوعة',
+    startRandomWorkout: 'بدء التمرين العشوائي',
+    levelComplete: 'اكتمل المستوى!',
+    xpEarned: 'XP مكتسبة!',
+    continueTraining: 'متابعة التدريب',
+    unlockAllProDrills: 'فتح جميع تمارين برو',
+    eliteSkillsAdvanced: 'مهارات نخبة وتدريب متقدم',
+    yourJourney: 'رحلتك',
+    completeAllDrillsEarn: 'أكمل جميع التمارين للحصول على',
+    drillsInThisLevel: 'التمارين في هذا المستوى',
     
     // Profile screen
     editProfile: 'تعديل الملف',
@@ -573,6 +732,45 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     analyzeVideo: 'تحليل الفيديو',
     processing: 'جاري المعالجة...',
     selectVideo: 'اختر فيديو للتحليل',
+    proFeature: 'ميزة برو',
+    proFeatureDesc: 'تحليل الفيديو هو ميزة برو. قم بالترقية لفتح التحليل بالذكاء الاصطناعي لمقاطع كرة القدم.',
+    permissionRequired: 'الإذن مطلوب',
+    grantAccessMedia: 'يرجى منح حق الوصول إلى مكتبة الوسائط لرفع الفيديوهات.',
+    uploading: 'جاري الرفع...',
+    analyzing: 'جاري التحليل...',
+    coachAnalysis: 'تحليل المدرب',
+    whatsWorking: 'ما يعمل جيداً',
+    workOnThis: 'اعمل على هذا',
+    performanceRatings: 'تقييمات الأداء',
+    coachTips: 'نصائح المدرب',
+    recommendedTraining: 'التدريب الموصى به',
+    tapToStartTraining: 'اضغط لبدء رحلة التدريب',
+    startTrainingArrow: 'بدء التدريب ←',
+    yourAnalyses: 'تحليلاتك',
+    whatWeAnalyze: 'ما نحلله',
+    howItWorks: 'كيف يعمل',
+    upload: 'رفع',
+    improve: 'تحسين',
+    important: 'مهم',
+    uploadDesc: 'سجل أو اختر فيديو من معرض الصور (حتى 60 ثانية)',
+    analyzeDesc: 'يراجع الذكاء الاصطناعي تقنيتك وحركتك ووضعك',
+    improveDesc: 'احصل على نصائح وتمارين مخصصة تضاف إلى خطة تدريبك',
+    importantDesc: 'قم فقط برفع مقاطع كرة القدم. وإلا قد يقدم الذكاء الاصطناعي تحليلاً غير صحيح.',
+    unlockVideoAnalysis: 'فتح تحليل الفيديو',
+    getAiFeedback: 'احصل على ملاحظات الذكاء الاصطناعي على تقنيتك',
+    analysisFailed: 'فشل التحليل',
+    tryAgain: 'حاول مرة أخرى',
+    uploadingVideo: 'جاري رفع الفيديو...',
+    processingFrames: 'جاري معالجة الإطارات...',
+    aiAnalyzing: 'الذكاء الاصطناعي يحلل التقنية...',
+    positioning: 'التموضع',
+    movement: 'الحركة',
+    dribblingMastery: 'إتقان المراوغة',
+    shootingMastery: 'إتقان التسديد',
+    passingMastery: 'إتقان التمرير',
+    speedTraining: 'تدريب السرعة',
+    defensiveSkills: 'المهارات الدفاعية',
+    fitnessProgram: 'برنامج اللياقة',
     
     // Auth
     welcomeBack: 'مرحباً بعودتك',
@@ -704,6 +902,16 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     upgrade: 'Mejorar',
     restorePurchases: 'Restaurar Compras',
     tryFree: 'Prueba Gratis por 3 Días',
+    lvl: 'Nvl',
+    drillsWord: 'ejercicios',
+    levels: 'niveles',
+    unlock: 'Desbloquear',
+    xpProgress: 'Progreso XP',
+    xpToLevel: 'XP para Nivel',
+    totalXp: 'XP Total',
+    drillsDone: 'Ejercicios Hechos',
+    champion: 'Campeón',
+    min: 'min',
     
     // Home screen
     goodMorning: 'Buenos días',
@@ -725,6 +933,9 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     unlockPotential: 'Desbloquea Tu Potencial Completo',
     aiVideoAnalysis: 'Análisis de video IA • Ejercicios avanzados • Coaching personal',
     aiTip: 'Consejo IA',
+    yourSkills: 'Tus Habilidades',
+    drillsCompleted: 'ejercicios completados',
+    startWorkout: 'Iniciar Entrenamiento',
     
     // Drills screen
     aiRecommended: 'Recomendado por IA',
@@ -745,9 +956,23 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     easy: 'Fácil',
     medium: 'Medio',
     hard: 'Difícil',
+    elite: 'Élite',
     done: 'Hecho',
     unlockMoreDrills: 'Desbloquea más ejercicios pro',
     goPro: 'Ir Pro',
+    skillMastery: 'Dominio de Habilidades',
+    progressThroughLevels: 'Progresa por los niveles',
+    randomWorkout: 'ENTRENAMIENTO ALEATORIO',
+    mixedSkills: 'Habilidades mixtas',
+    startRandomWorkout: 'Iniciar Entrenamiento Aleatorio',
+    levelComplete: '¡Nivel Completado!',
+    xpEarned: '¡XP Ganada!',
+    continueTraining: 'Continuar Entrenamiento',
+    unlockAllProDrills: 'Desbloquear Todos los Ejercicios Pro',
+    eliteSkillsAdvanced: 'Habilidades élite y entrenamiento avanzado',
+    yourJourney: 'Tu Viaje',
+    completeAllDrillsEarn: 'Completa todos los ejercicios para ganar',
+    drillsInThisLevel: 'Ejercicios en este nivel',
     
     // Profile screen
     editProfile: 'Editar Perfil',
@@ -784,6 +1009,45 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     analyzeVideo: 'Analizar Video',
     processing: 'Procesando...',
     selectVideo: 'Selecciona un video para analizar',
+    proFeature: 'Función Pro',
+    proFeatureDesc: 'El análisis de video es una función Pro. Mejora para desbloquear el análisis con IA de tus clips de fútbol.',
+    permissionRequired: 'Permiso Requerido',
+    grantAccessMedia: 'Por favor concede acceso a tu biblioteca multimedia para subir videos.',
+    uploading: 'Subiendo...',
+    analyzing: 'Analizando...',
+    coachAnalysis: 'Análisis del Entrenador',
+    whatsWorking: 'Lo Que Funciona',
+    workOnThis: 'Trabaja En Esto',
+    performanceRatings: 'Calificaciones de Rendimiento',
+    coachTips: 'Consejos del Entrenador',
+    recommendedTraining: 'Entrenamiento Recomendado',
+    tapToStartTraining: 'Toca para iniciar tu viaje de entrenamiento',
+    startTrainingArrow: 'Iniciar entrenamiento →',
+    yourAnalyses: 'Tus Análisis',
+    whatWeAnalyze: 'Lo Que Analizamos',
+    howItWorks: 'Cómo Funciona',
+    upload: 'Subir',
+    improve: 'Mejorar',
+    important: 'Importante',
+    uploadDesc: 'Graba o selecciona un video de tu galería (hasta 60 segundos)',
+    analyzeDesc: 'Nuestra IA revisa tu técnica, movimiento y posicionamiento',
+    improveDesc: 'Obtén consejos personalizados y ejercicios añadidos a tu plan de entrenamiento',
+    importantDesc: 'Solo sube clips de fútbol. De lo contrario, la IA puede proporcionar un análisis incorrecto.',
+    unlockVideoAnalysis: 'Desbloquear Análisis de Video',
+    getAiFeedback: 'Obtén retroalimentación de IA sobre tu técnica',
+    analysisFailed: 'Análisis Fallido',
+    tryAgain: 'Intentar de Nuevo',
+    uploadingVideo: 'Subiendo video...',
+    processingFrames: 'Procesando fotogramas...',
+    aiAnalyzing: 'IA analizando técnica...',
+    positioning: 'Posicionamiento',
+    movement: 'Movimiento',
+    dribblingMastery: 'Dominio del Regate',
+    shootingMastery: 'Dominio del Tiro',
+    passingMastery: 'Dominio del Pase',
+    speedTraining: 'Entrenamiento de Velocidad',
+    defensiveSkills: 'Habilidades Defensivas',
+    fitnessProgram: 'Programa de Fitness',
     
     // Auth
     welcomeBack: 'Bienvenido de Nuevo',
@@ -915,6 +1179,16 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     upgrade: 'Améliorer',
     restorePurchases: 'Restaurer les Achats',
     tryFree: 'Essai Gratuit de 3 Jours',
+    lvl: 'Niv',
+    drillsWord: 'exercices',
+    levels: 'niveaux',
+    unlock: 'Débloquer',
+    xpProgress: 'Progression XP',
+    xpToLevel: 'XP pour Niveau',
+    totalXp: 'XP Total',
+    drillsDone: 'Exercices Faits',
+    champion: 'Champion',
+    min: 'min',
     
     // Home screen
     goodMorning: 'Bonjour',
@@ -936,6 +1210,9 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     unlockPotential: 'Libérez Votre Plein Potentiel',
     aiVideoAnalysis: 'Analyse vidéo IA • Exercices avancés • Coaching personnel',
     aiTip: 'Conseil IA',
+    yourSkills: 'Vos Compétences',
+    drillsCompleted: 'exercices complétés',
+    startWorkout: 'Démarrer Entraînement',
     
     // Drills screen
     aiRecommended: 'Recommandé par IA',
@@ -956,9 +1233,23 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     easy: 'Facile',
     medium: 'Moyen',
     hard: 'Difficile',
+    elite: 'Élite',
     done: 'Fait',
     unlockMoreDrills: "Débloquez plus d'exercices pro",
     goPro: 'Passer Pro',
+    skillMastery: 'Maîtrise des Compétences',
+    progressThroughLevels: 'Progressez à travers les niveaux',
+    randomWorkout: 'ENTRAÎNEMENT ALÉATOIRE',
+    mixedSkills: 'Compétences mixtes',
+    startRandomWorkout: 'Démarrer Entraînement Aléatoire',
+    levelComplete: 'Niveau Terminé!',
+    xpEarned: 'XP Gagnés!',
+    continueTraining: 'Continuer Entraînement',
+    unlockAllProDrills: 'Débloquer Tous les Exercices Pro',
+    eliteSkillsAdvanced: 'Compétences élite et entraînement avancé',
+    yourJourney: 'Votre Parcours',
+    completeAllDrillsEarn: 'Complétez tous les exercices pour gagner',
+    drillsInThisLevel: 'Exercices dans ce niveau',
     
     // Profile screen
     editProfile: 'Modifier le Profil',
@@ -995,6 +1286,45 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     analyzeVideo: 'Analyser Vidéo',
     processing: 'Traitement...',
     selectVideo: 'Sélectionnez une vidéo à analyser',
+    proFeature: 'Fonction Pro',
+    proFeatureDesc: "L'analyse vidéo est une fonction Pro. Améliorez pour débloquer l'analyse IA de vos clips de football.",
+    permissionRequired: 'Permission Requise',
+    grantAccessMedia: 'Veuillez accorder l\'accès à votre bibliothèque multimédia pour télécharger des vidéos.',
+    uploading: 'Téléchargement...',
+    analyzing: 'Analyse...',
+    coachAnalysis: 'Analyse du Coach',
+    whatsWorking: 'Ce Qui Fonctionne',
+    workOnThis: 'Travaillez Sur Ceci',
+    performanceRatings: 'Évaluations de Performance',
+    coachTips: 'Conseils du Coach',
+    recommendedTraining: 'Entraînement Recommandé',
+    tapToStartTraining: 'Appuyez pour commencer votre parcours d\'entraînement',
+    startTrainingArrow: 'Démarrer entraînement →',
+    yourAnalyses: 'Vos Analyses',
+    whatWeAnalyze: 'Ce Que Nous Analysons',
+    howItWorks: 'Comment Ça Marche',
+    upload: 'Télécharger',
+    improve: 'Améliorer',
+    important: 'Important',
+    uploadDesc: 'Enregistrez ou sélectionnez une vidéo de votre galerie (jusqu\'à 60 secondes)',
+    analyzeDesc: 'Notre IA examine votre technique, mouvement et positionnement',
+    improveDesc: 'Obtenez des conseils personnalisés et des exercices ajoutés à votre plan d\'entraînement',
+    importantDesc: 'Ne téléchargez que des clips de football. Sinon, l\'IA peut fournir une analyse incorrecte.',
+    unlockVideoAnalysis: 'Débloquer Analyse Vidéo',
+    getAiFeedback: 'Obtenez des retours IA sur votre technique',
+    analysisFailed: 'Analyse Échouée',
+    tryAgain: 'Réessayer',
+    uploadingVideo: 'Téléchargement vidéo...',
+    processingFrames: 'Traitement des images...',
+    aiAnalyzing: 'IA analyse la technique...',
+    positioning: 'Positionnement',
+    movement: 'Mouvement',
+    dribblingMastery: 'Maîtrise du Dribble',
+    shootingMastery: 'Maîtrise du Tir',
+    passingMastery: 'Maîtrise de la Passe',
+    speedTraining: 'Entraînement Vitesse',
+    defensiveSkills: 'Compétences Défensives',
+    fitnessProgram: 'Programme Fitness',
     
     // Auth
     welcomeBack: 'Bon Retour',

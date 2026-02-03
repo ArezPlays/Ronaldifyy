@@ -49,14 +49,14 @@ interface VideoAnalysis {
 
 type SkillCategory = 'dribbling' | 'shooting' | 'passing' | 'speed' | 'defense' | 'fitness';
 
-const SKILL_CATEGORY_INFO: Record<SkillCategory, { emoji: string; title: string; color: string }> = {
-  dribbling: { emoji: '⚡', title: 'Dribbling Mastery', color: '#FF6B35' },
-  shooting: { emoji: '🎯', title: 'Shooting Mastery', color: '#E74C3C' },
-  passing: { emoji: '🎪', title: 'Passing Mastery', color: '#3498DB' },
-  speed: { emoji: '💨', title: 'Speed Training', color: '#9B59B6' },
-  defense: { emoji: '🛡️', title: 'Defensive Skills', color: '#27AE60' },
-  fitness: { emoji: '💪', title: 'Fitness Program', color: '#F39C12' },
-};
+const getSkillCategoryInfo = (t: any): Record<SkillCategory, { emoji: string; title: string; color: string }> => ({
+  dribbling: { emoji: '⚡', title: t.dribblingMastery, color: '#FF6B35' },
+  shooting: { emoji: '🎯', title: t.shootingMastery, color: '#E74C3C' },
+  passing: { emoji: '🎪', title: t.passingMastery, color: '#3498DB' },
+  speed: { emoji: '💨', title: t.speedTraining, color: '#9B59B6' },
+  defense: { emoji: '🛡️', title: t.defensiveSkills, color: '#27AE60' },
+  fitness: { emoji: '💪', title: t.fitnessProgram, color: '#F39C12' },
+});
 
 const analysisSchema = z.object({
   isFootballVideo: z.boolean().describe('Is this football/soccer training or gameplay footage?'),
@@ -75,12 +75,12 @@ const analysisSchema = z.object({
   weaknessAreas: z.array(z.string()).describe('2-3 specific areas to improve with emoji prefix. Example: "📍 Body positioning during shots" or "🎯 Ball control under pressure"'),
 });
 
-const ANALYSIS_CATEGORIES = [
-  { id: 'dribbling', label: 'Dribbling', emoji: '⚡' },
-  { id: 'passing', label: 'Passing', emoji: '🎯' },
-  { id: 'shooting', label: 'Shooting', emoji: '💥' },
-  { id: 'positioning', label: 'Positioning', emoji: '📍' },
-  { id: 'movement', label: 'Movement', emoji: '🏃' },
+const getAnalysisCategories = (t: any) => [
+  { id: 'dribbling', label: t.dribbling, emoji: '⚡' },
+  { id: 'passing', label: t.passing, emoji: '🎯' },
+  { id: 'shooting', label: t.shooting, emoji: '💥' },
+  { id: 'positioning', label: t.positioning, emoji: '📍' },
+  { id: 'movement', label: t.movement, emoji: '🏃' },
 ];
 
 export default function VideoScreen() {
@@ -253,11 +253,11 @@ Watch carefully and give your honest, energetic coaching assessment!`;
   const pickVideo = useCallback(async () => {
     if (!isPro) {
       Alert.alert(
-        'Pro Feature',
-        'Video analysis is a Pro feature. Upgrade to unlock AI-powered analysis of your football clips.',
+        t.proFeature,
+        t.proFeatureDesc,
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push('/paywall') },
+          { text: t.cancel, style: 'cancel' },
+          { text: t.upgrade, onPress: () => router.push('/paywall') },
         ]
       );
       return;
@@ -267,7 +267,7 @@ Watch carefully and give your honest, energetic coaching assessment!`;
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (!permissionResult.granted) {
-        Alert.alert('Permission Required', 'Please grant access to your media library to upload videos.');
+        Alert.alert(t.permissionRequired, t.grantAccessMedia);
         return;
       }
 
@@ -283,9 +283,9 @@ Watch carefully and give your honest, energetic coaching assessment!`;
       }
     } catch (error) {
       console.log('Error picking video:', error);
-      Alert.alert('Error', 'Failed to select video. Please try again.');
+      Alert.alert(t.error, t.tryAgain);
     }
-  }, [isPro, router, analyzeVideo]);
+  }, [isPro, router, analyzeVideo, t]);
 
   const renderScoreBar = (score: number | null, label: string, emoji: string) => {
     if (score === null) return null;
@@ -308,10 +308,10 @@ Watch carefully and give your honest, energetic coaching assessment!`;
 
   const getStatusText = (status: VideoAnalysis['status'], progress: number) => {
     switch (status) {
-      case 'uploading': return `Uploading video... ${progress}%`;
-      case 'processing': return `Processing frames... ${progress}%`;
-      case 'analyzing': return `AI analyzing technique... ${progress}%`;
-      default: return 'Processing...';
+      case 'uploading': return `${t.uploadingVideo} ${progress}%`;
+      case 'processing': return `${t.processingFrames} ${progress}%`;
+      case 'analyzing': return `${t.aiAnalyzing} ${progress}%`;
+      default: return t.processing;
     }
   };
 
@@ -322,8 +322,8 @@ Watch carefully and give your honest, energetic coaching assessment!`;
           <View style={styles.analysisHeader}>
             <Video size={20} color={colors.primary} />
             <Text style={styles.analysisTitle}>
-              {analysis.status === 'uploading' ? 'Uploading...' : 
-               analysis.status === 'processing' ? 'Processing...' : 'Analyzing...'}
+              {analysis.status === 'uploading' ? t.uploading : 
+               analysis.status === 'processing' ? t.processing : t.analyzing}
             </Text>
           </View>
           <View style={styles.analyzingContent}>
@@ -338,13 +338,13 @@ Watch carefully and give your honest, energetic coaching assessment!`;
             </Text>
             <View style={styles.processingSteps}>
               <View style={[styles.processingStep, analysis.progress >= 30 && styles.processingStepComplete]}>
-                <Text style={styles.processingStepText}>📤 Upload</Text>
+                <Text style={styles.processingStepText}>📤 {t.upload}</Text>
               </View>
               <View style={[styles.processingStep, analysis.progress >= 60 && styles.processingStepComplete]}>
-                <Text style={styles.processingStepText}>🎬 Process</Text>
+                <Text style={styles.processingStepText}>🎬 {t.processing}</Text>
               </View>
               <View style={[styles.processingStep, analysis.progress >= 90 && styles.processingStepComplete]}>
-                <Text style={styles.processingStepText}>🤖 Analyze</Text>
+                <Text style={styles.processingStepText}>🤖 {t.analyze}</Text>
               </View>
             </View>
           </View>
@@ -357,13 +357,13 @@ Watch carefully and give your honest, energetic coaching assessment!`;
         <View key={analysis.id} style={styles.analysisCard}>
           <View style={styles.analysisHeader}>
             <AlertCircle size={20} color="#F44336" />
-            <Text style={styles.analysisTitle}>Analysis Failed</Text>
+            <Text style={styles.analysisTitle}>{t.analysisFailed}</Text>
           </View>
           <Text style={styles.errorText}>
-            We couldn&apos;t analyze this video. Please try uploading again.
+            {t.tryAgain}
           </Text>
           <TouchableOpacity style={styles.retryButton} onPress={pickVideo}>
-            <Text style={styles.retryButtonText}>Try Again</Text>
+            <Text style={styles.retryButtonText}>{t.tryAgain}</Text>
           </TouchableOpacity>
         </View>
       );
@@ -375,7 +375,7 @@ Watch carefully and give your honest, energetic coaching assessment!`;
       <View key={analysis.id} style={styles.analysisCard}>
         <View style={styles.analysisHeader}>
           <CheckCircle size={20} color={colors.primary} />
-          <Text style={styles.analysisTitle}>Coach Analysis ⚽</Text>
+          <Text style={styles.analysisTitle}>{t.coachAnalysis} ⚽</Text>
         </View>
 
         {/* Coach Greeting */}
@@ -398,7 +398,7 @@ Watch carefully and give your honest, energetic coaching assessment!`;
           <View style={styles.strengthWeaknessContainer}>
             {analysis.analysis.strengthAreas && analysis.analysis.strengthAreas.length > 0 && (
               <View style={styles.strengthSection}>
-                <Text style={styles.strengthTitle}>What&apos;s Working</Text>
+                <Text style={styles.strengthTitle}>{t.whatsWorking}</Text>
                 {analysis.analysis.strengthAreas.map((area, idx) => (
                   <Text key={idx} style={styles.strengthItem}>{area}</Text>
                 ))}
@@ -406,7 +406,7 @@ Watch carefully and give your honest, energetic coaching assessment!`;
             )}
             {analysis.analysis.weaknessAreas && analysis.analysis.weaknessAreas.length > 0 && (
               <View style={styles.weaknessSection}>
-                <Text style={styles.weaknessTitle}>Work On This</Text>
+                <Text style={styles.weaknessTitle}>{t.workOnThis}</Text>
                 {analysis.analysis.weaknessAreas.map((area, idx) => (
                   <Text key={idx} style={styles.weaknessItem}>{area}</Text>
                 ))}
@@ -417,8 +417,8 @@ Watch carefully and give your honest, energetic coaching assessment!`;
 
         {analysis.analysis.visibleCategories && analysis.analysis.visibleCategories.length > 0 && (
           <View style={styles.scoresContainer}>
-            <Text style={styles.scoresTitle}>📊 Performance Ratings</Text>
-            {ANALYSIS_CATEGORIES.map(cat => {
+            <Text style={styles.scoresTitle}>📊 {t.performanceRatings}</Text>
+            {getAnalysisCategories(t).map(cat => {
               const score = analysis.analysis![cat.id as keyof typeof analysis.analysis];
               if (typeof score !== 'number') return null;
               return renderScoreBar(score, cat.label, cat.emoji);
@@ -427,7 +427,7 @@ Watch carefully and give your honest, energetic coaching assessment!`;
         )}
 
         <View style={styles.tipsContainer}>
-          <Text style={styles.tipsTitle}>🎯 Coach&apos;s Tips</Text>
+          <Text style={styles.tipsTitle}>🎯 {t.coachTips}</Text>
           {analysis.analysis.tips.map((tip, idx) => (
             <View key={idx} style={styles.tipItem}>
               <Text style={styles.tipNumber}>{idx + 1}</Text>
@@ -439,10 +439,10 @@ Watch carefully and give your honest, energetic coaching assessment!`;
         {/* Recommended Skill Training Paths */}
         {analysis.analysis.recommendedSkillPaths && analysis.analysis.recommendedSkillPaths.length > 0 && (
           <View style={styles.skillPathsContainer}>
-            <Text style={styles.skillPathsTitle}>🚀 Recommended Training</Text>
-            <Text style={styles.skillPathsSubtitle}>Tap to start your training journey</Text>
+            <Text style={styles.skillPathsTitle}>🚀 {t.recommendedTraining}</Text>
+            <Text style={styles.skillPathsSubtitle}>{t.tapToStartTraining}</Text>
             {analysis.analysis.recommendedSkillPaths.map((skillId, idx) => {
-              const skillInfo = SKILL_CATEGORY_INFO[skillId as SkillCategory];
+              const skillInfo = getSkillCategoryInfo(t)[skillId as SkillCategory];
               if (!skillInfo) return null;
               return (
                 <TouchableOpacity 
@@ -455,7 +455,7 @@ Watch carefully and give your honest, energetic coaching assessment!`;
                   </View>
                   <View style={styles.skillPathContent}>
                     <Text style={styles.skillPathName}>{skillInfo.title}</Text>
-                    <Text style={styles.skillPathCta}>Start training →</Text>
+                    <Text style={styles.skillPathCta}>{t.startTrainingArrow}</Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -517,15 +517,15 @@ Watch carefully and give your honest, energetic coaching assessment!`;
 
           {analyses.length > 0 ? (
             <View style={styles.analysesSection}>
-              <Text style={styles.sectionTitle}>Your Analyses</Text>
+              <Text style={styles.sectionTitle}>{t.yourAnalyses}</Text>
               {analyses.map(renderAnalysis)}
             </View>
           ) : (
             <>
               <View style={styles.featuresSection}>
-                <Text style={styles.sectionTitle}>What We Analyze</Text>
+                <Text style={styles.sectionTitle}>{t.whatWeAnalyze}</Text>
                 <View style={styles.featuresGrid}>
-                  {ANALYSIS_CATEGORIES.map(cat => (
+                  {getAnalysisCategories(t).map(cat => (
                     <View key={cat.id} style={styles.featureCard}>
                       <Text style={styles.featureEmoji}>{cat.emoji}</Text>
                       <Text style={styles.featureLabel}>{cat.label}</Text>
@@ -535,30 +535,30 @@ Watch carefully and give your honest, energetic coaching assessment!`;
               </View>
 
               <View style={styles.howItWorks}>
-                <Text style={styles.sectionTitle}>How It Works</Text>
+                <Text style={styles.sectionTitle}>{t.howItWorks}</Text>
                 <View style={styles.stepsList}>
                   <StepItem 
                     number={1} 
-                    title="Upload" 
-                    description="Record or select a video from your gallery (up to 60 seconds)"
+                    title={t.upload} 
+                    description={t.uploadDesc}
                     colors={colors}
                   />
                   <StepItem 
                     number={2} 
-                    title="Analyze" 
-                    description="Our AI reviews your technique, movement, and positioning"
+                    title={t.analyze} 
+                    description={t.analyzeDesc}
                     colors={colors}
                   />
                   <StepItem 
                     number={3} 
-                    title="Improve" 
-                    description="Get personalized tips and drills added to your training plan"
+                    title={t.improve} 
+                    description={t.improveDesc}
                     colors={colors}
                   />
                   <StepItem 
                     number={4} 
-                    title="Important" 
-                    description="Only upload football-related clips. Otherwise, the AI may provide incorrect analysis."
+                    title={t.important} 
+                    description={t.importantDesc}
                     colors={colors}
                     isWarning={true}
                   />
@@ -580,9 +580,9 @@ Watch carefully and give your honest, energetic coaching assessment!`;
               >
                 <Sparkles size={24} color="#000000" />
                 <View style={styles.proContent}>
-                  <Text style={styles.proTitle}>Unlock Video Analysis</Text>
+                  <Text style={styles.proTitle}>{t.unlockVideoAnalysis}</Text>
                   <Text style={styles.proSubtitle}>
-                    Get AI-powered feedback on your technique
+                    {t.getAiFeedback}
                   </Text>
                 </View>
               </LinearGradient>

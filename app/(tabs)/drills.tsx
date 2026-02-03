@@ -112,10 +112,10 @@ export default function DrillsScreen() {
 
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return t.easy || 'Easy';
-      case 'medium': return t.medium || 'Medium';
-      case 'hard': return t.hard || 'Hard';
-      case 'elite': return 'Elite';
+      case 'easy': return t.easy;
+      case 'medium': return t.medium;
+      case 'hard': return t.hard;
+      case 'elite': return t.elite;
       default: return difficulty;
     }
   };
@@ -191,7 +191,7 @@ export default function DrillsScreen() {
               <Text style={styles.skillIconText}>{path.icon}</Text>
             </View>
             <View style={styles.skillLevelBadge}>
-              <Text style={styles.skillLevelText}>Lvl {skillProgress.currentLevel}</Text>
+              <Text style={styles.skillLevelText}>{t.lvl} {skillProgress.currentLevel}</Text>
             </View>
           </View>
           
@@ -208,12 +208,12 @@ export default function DrillsScreen() {
               />
             </View>
             <Text style={styles.skillProgressText}>
-              {skillProgress.drillsCompleted}/{skillProgress.totalDrills} drills
+              {skillProgress.drillsCompleted}/{skillProgress.totalDrills} {t.drillsWord}
             </Text>
           </View>
 
           <View style={styles.skillCardFooter}>
-            <Text style={styles.skillLevelsText}>{path.totalLevels} levels</Text>
+            <Text style={styles.skillLevelsText}>{path.totalLevels} {t.levels}</Text>
             <ChevronRight size={18} color={colors.textMuted} />
           </View>
         </LinearGradient>
@@ -276,7 +276,7 @@ export default function DrillsScreen() {
           <View style={styles.levelMeta}>
             <View style={styles.levelMetaItem}>
               <Play size={12} color={colors.textMuted} />
-              <Text style={styles.levelMetaText}>{level.drillIds.length} drills</Text>
+              <Text style={styles.levelMetaText}>{level.drillIds.length} {t.drillsWord}</Text>
             </View>
             {canAccess && !isComplete && (
               <View style={styles.levelMetaItem}>
@@ -299,7 +299,7 @@ export default function DrillsScreen() {
           <ChevronRight size={20} color={isComplete ? path.color : colors.textMuted} />
         ) : isProLocked ? (
           <View style={styles.unlockProBtn}>
-            <Text style={styles.unlockProBtnText}>Unlock</Text>
+            <Text style={styles.unlockProBtnText}>{t.unlock}</Text>
           </View>
         ) : null}
       </TouchableOpacity>
@@ -333,14 +333,14 @@ export default function DrillsScreen() {
               </View>
               <View style={styles.streakBadge}>
                 <Flame size={14} color="#FF6B35" />
-                <Text style={styles.streakText}>{progress.streak} day streak</Text>
+                <Text style={styles.streakText}>{progress.streak} {t.dayStreak}</Text>
               </View>
             </View>
             
             <View style={styles.xpSection}>
               <View style={styles.xpHeader}>
-                <Text style={styles.xpLabel}>XP Progress</Text>
-                <Text style={styles.xpValue}>{xpToNextLevel} XP to Level {progress.level + 1}</Text>
+                <Text style={styles.xpLabel}>{t.xpProgress}</Text>
+                <Text style={styles.xpValue}>{xpToNextLevel} {t.xpToLevel} {progress.level + 1}</Text>
               </View>
               <View style={styles.xpBar}>
                 <View style={[styles.xpFill, { width: `${levelProgress}%` }]} />
@@ -351,19 +351,19 @@ export default function DrillsScreen() {
               <View style={styles.statItem}>
                 <Zap size={16} color={colors.primary} />
                 <Text style={styles.statValue}>{progress.xp}</Text>
-                <Text style={styles.statLabel}>Total XP</Text>
+                <Text style={styles.statLabel}>{t.totalXp}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <CheckCircle size={16} color={colors.success} />
                 <Text style={styles.statValue}>{progress.completedDrills.length}</Text>
-                <Text style={styles.statLabel}>Drills Done</Text>
+                <Text style={styles.statLabel}>{t.drillsDone}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Clock size={16} color={colors.warning} />
                 <Text style={styles.statValue}>{progress.totalTrainingMinutes}m</Text>
-                <Text style={styles.statLabel}>Training</Text>
+                <Text style={styles.statLabel}>{t.training}</Text>
               </View>
             </View>
           </LinearGradient>
@@ -372,8 +372,8 @@ export default function DrillsScreen() {
         {/* Skill Mastery Paths */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Skill Mastery</Text>
-            <Text style={styles.sectionSubtitle}>Progress through levels</Text>
+            <Text style={styles.sectionTitle}>{t.skillMastery}</Text>
+            <Text style={styles.sectionSubtitle}>{t.progressThroughLevels}</Text>
           </View>
 
           <View style={styles.skillsGrid}>
@@ -393,7 +393,7 @@ export default function DrillsScreen() {
               <View style={styles.workoutHeader}>
                 <View style={styles.randomWorkoutBadge}>
                   <Sparkles size={14} color={colors.primary} />
-                  <Text style={styles.randomWorkoutBadgeText}>RANDOM WORKOUT</Text>
+                  <Text style={styles.randomWorkoutBadgeText}>{t.randomWorkout}</Text>
                 </View>
                 <View style={styles.xpRewardBadge}>
                   <Zap size={12} color="#000000" />
@@ -403,7 +403,7 @@ export default function DrillsScreen() {
               
               <Text style={styles.randomWorkoutTitle}>{dailyWorkout.title}</Text>
               <Text style={styles.randomWorkoutDesc}>
-                {dailyWorkout.drillIds.length} drills • {dailyWorkout.duration} min • Mixed skills
+                {dailyWorkout.drillIds.length} {t.drillsWord} • {dailyWorkout.duration} {t.min} • {t.mixedSkills}
               </Text>
 
               <TouchableOpacity 
@@ -412,7 +412,7 @@ export default function DrillsScreen() {
                 activeOpacity={0.8}
               >
                 <Play size={18} color="#FFFFFF" fill="#FFFFFF" />
-                <Text style={styles.startRandomWorkoutText}>Start Random Workout</Text>
+                <Text style={styles.startRandomWorkoutText}>{t.startRandomWorkout}</Text>
               </TouchableOpacity>
             </LinearGradient>
           </View>
@@ -449,7 +449,7 @@ export default function DrillsScreen() {
               <View style={styles.congratsIconContainer}>
                 <Trophy size={48} color="#000000" />
               </View>
-              <Text style={styles.congratsTitle}>Level Complete! 🎉</Text>
+              <Text style={styles.congratsTitle}>{t.levelComplete} 🎉</Text>
               <Text style={styles.congratsSubtitle}>
                 {completedLevelInfo?.skillName}
               </Text>
@@ -458,7 +458,7 @@ export default function DrillsScreen() {
               </Text>
               <View style={styles.congratsXpBadge}>
                 <Zap size={16} color="#000000" />
-                <Text style={styles.congratsXpText}>+{completedLevelInfo?.xpReward} XP Earned!</Text>
+                <Text style={styles.congratsXpText}>+{completedLevelInfo?.xpReward} {t.xpEarned}</Text>
               </View>
               <TouchableOpacity
                 style={styles.congratsButton}
@@ -467,7 +467,7 @@ export default function DrillsScreen() {
                   congratsAnim.setValue(0);
                 }}
               >
-                <Text style={styles.congratsButtonText}>Continue Training</Text>
+                <Text style={styles.congratsButtonText}>{t.continueTraining}</Text>
               </TouchableOpacity>
             </LinearGradient>
           </Animated.View>
@@ -490,8 +490,8 @@ export default function DrillsScreen() {
               <View style={styles.proPromptContent}>
                 <Trophy size={24} color="#000000" />
                 <View style={styles.proPromptText}>
-                  <Text style={styles.proPromptTitle}>Unlock All Pro Drills</Text>
-                  <Text style={styles.proPromptSubtitle}>Elite skills & advanced training</Text>
+                  <Text style={styles.proPromptTitle}>{t.unlockAllProDrills}</Text>
+                  <Text style={styles.proPromptSubtitle}>{t.eliteSkillsAdvanced}</Text>
                 </View>
               </View>
               <ChevronRight size={24} color="#000000" />
@@ -555,7 +555,7 @@ export default function DrillsScreen() {
               contentContainerStyle={styles.levelsContent}
             >
               <Text style={[styles.levelsTitle, { color: colors.text }]}>
-                Your Journey
+                {t.yourJourney}
               </Text>
               
               {selectedSkillPath.levels.map(level => renderLevelItem(selectedSkillPath, level))}
@@ -598,7 +598,7 @@ export default function DrillsScreen() {
               <View style={styles.levelRewardCard}>
                 <Star size={16} color={colors.accent} />
                 <Text style={[styles.levelRewardCardText, { color: colors.text }]}>
-                  Complete all drills to earn +{selectedLevel.unlockReward} XP
+                  {t.completeAllDrillsEarn} +{selectedLevel.unlockReward} XP
                 </Text>
               </View>
             </LinearGradient>
@@ -608,7 +608,7 @@ export default function DrillsScreen() {
               contentContainerStyle={styles.levelsContent}
             >
               <Text style={[styles.levelsTitle, { color: colors.text }]}>
-                Drills in this level
+                {t.drillsInThisLevel}
               </Text>
               
               {selectedLevel.drillIds.map((drillId: string) => {

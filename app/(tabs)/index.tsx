@@ -45,7 +45,7 @@ export default function HomeScreen() {
 
   const positionLabel = profile?.position 
     ? POSITIONS.find(p => p.id === profile.position)?.label 
-    : 'Player';
+    : t.player;
 
   const { progress, dailyWorkout, getAllSkillsProgress } = useTraining();
 
@@ -99,7 +99,7 @@ export default function HomeScreen() {
             <View style={styles.headerTop}>
               <View>
                 <Text style={styles.greeting}>{getTimeOfDayGreeting()},</Text>
-                <Text style={styles.name}>{profile?.name || 'Champion'}</Text>
+                <Text style={styles.name}>{profile?.name || t.champion}</Text>
               </View>
               {isPro ? (
                 <View style={styles.proBadge}>
@@ -111,7 +111,7 @@ export default function HomeScreen() {
                   style={styles.upgradeButton}
                   onPress={() => router.push('/paywall')}
                 >
-                  <Text style={styles.upgradeText}>Upgrade</Text>
+                  <Text style={styles.upgradeText}>{t.upgrade}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -150,7 +150,7 @@ export default function HomeScreen() {
                   <View style={styles.streakStats}>
                     <View style={styles.streakStatItem}>
                       <Text style={styles.streakStatValue}>{progress.sessionsThisWeek || 0}</Text>
-                      <Text style={styles.streakStatLabel}>Sessions</Text>
+                      <Text style={styles.streakStatLabel}>{t.sessions}</Text>
                     </View>
                     <View style={styles.streakStatDivider} />
                     <View style={styles.streakStatItem}>
@@ -201,13 +201,13 @@ export default function HomeScreen() {
                   <View style={styles.dailyGoalText}>
                     <Text style={styles.dailyGoalTitle}>{dailyWorkout.title}</Text>
                     <Text style={styles.dailyGoalSubtitle}>
-                      {dailyWorkout.drillIds.length} drills • {dailyWorkout.duration} min
+                      {dailyWorkout.drillIds.length} {t.drillsWord} • {dailyWorkout.duration} {t.min}
                     </Text>
                   </View>
                 </View>
                 <View style={styles.startWorkoutBtnSmall}>
                   <Play size={16} color="#000" fill="#000" />
-                  <Text style={styles.startWorkoutBtnText}>Start Workout</Text>
+                  <Text style={styles.startWorkoutBtnText}>{t.startWorkout}</Text>
                 </View>
               </TouchableOpacity>
             </Animated.View>
@@ -271,7 +271,7 @@ export default function HomeScreen() {
 
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Your Skills</Text>
+              <Text style={styles.sectionTitle}>{t.yourSkills}</Text>
               <TouchableOpacity onPress={() => router.push('/(tabs)/drills')}>
                 <Text style={styles.seeAllText}>{t.seeAll}</Text>
               </TouchableOpacity>
@@ -294,13 +294,13 @@ export default function HomeScreen() {
                     <View style={styles.skillContent}>
                       <View style={styles.skillTitleRow}>
                         <Text style={styles.skillTitle}>{path.title}</Text>
-                        <Text style={styles.skillLevelText}>Lvl {skill.currentLevel}</Text>
+                        <Text style={styles.skillLevelText}>{t.lvl} {skill.currentLevel}</Text>
                       </View>
                       <View style={styles.skillProgressBar}>
                         <View style={[styles.skillProgressFill, { width: `${skill.progress}%`, backgroundColor: path.color }]} />
                       </View>
                       <Text style={styles.skillProgressText}>
-                        {skill.drillsCompleted}/{skill.totalDrills} drills completed
+                        {skill.drillsCompleted}/{skill.totalDrills} {t.drillsCompleted}
                       </Text>
                     </View>
                     <ChevronRight size={18} color={colors.textMuted} />

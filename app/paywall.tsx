@@ -39,12 +39,6 @@ function getPackageLabelKey(packageType: string): 'weekly' | 'monthly' | 'yearly
   return 'monthly';
 }
 
-function getPackageSavingsKey(packageType: string): 'popular' | 'bestValue' | null {
-  if (packageType === '$rc_monthly') return 'popular';
-  if (packageType === '$rc_annual') return 'bestValue';
-  return null;
-}
-
 function getPackageBadgeText(packageType: string): string | null {
   if (packageType === '$rc_monthly') return 'MOST POPULAR';
   if (packageType === '$rc_annual') return 'SAVE 50%';
@@ -130,13 +124,6 @@ export default function PaywallScreen() {
   const getPackageLabel = (packageType: string): string => {
     const key = getPackageLabelKey(packageType);
     return t[key];
-  };
-  
-  const getPackageSavings = (packageType: string): string | null => {
-    const key = getPackageSavingsKey(packageType);
-    if (key === 'popular') return t.popular;
-    if (key === 'bestValue') return t.bestValue;
-    return null;
   };
   
   const dynamicStyles = createDynamicStyles(colors);

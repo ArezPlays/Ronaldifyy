@@ -43,6 +43,11 @@ const FAQ_ITEMS: FAQItem[] = [
     question: 'How do I restore my purchases?',
     answer: 'Go to Profile > Subscription and tap "Restore Purchases". Make sure you\'re signed in with the same account you used for the original purchase.',
   },
+  {
+    id: '7',
+    question: 'What equipment do I need for the drills?',
+    answer: 'Most drills only require a football and some space. Some advanced drills may use cones, agility ladders, or a wall for passing practice. Each drill shows the required equipment before you start.',
+  },
 ];
 
 export default function HelpCenterScreen() {

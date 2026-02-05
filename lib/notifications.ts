@@ -5,15 +5,26 @@ import Constants from 'expo-constants';
 
 const NOTIFICATION_SETTINGS_KEY = '@ronaldify_notification_settings';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+let notificationHandlerConfigured = false;
+
+export function setupNotificationHandler() {
+  if (notificationHandlerConfigured) return;
+  
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+    notificationHandlerConfigured = true;
+  } catch (error) {
+    console.log('Error setting notification handler:', error);
+  }
+}
 
 export interface NotificationSettings {
   enabled: boolean;
@@ -34,6 +45,8 @@ export async function registerForPushNotifications(): Promise<string | null> {
     console.log('Push notifications not supported on web');
     return null;
   }
+
+  setupNotificationHandler();
 
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();

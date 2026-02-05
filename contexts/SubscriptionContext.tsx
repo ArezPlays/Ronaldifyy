@@ -20,13 +20,23 @@ function getRCApiKey() {
   }) || '';
 }
 
-const apiKey = getRCApiKey();
 let isConfigured = false;
 
-if (apiKey && !isConfigured) {
-  console.log('Configuring RevenueCat with API key');
-  Purchases.configure({ apiKey });
-  isConfigured = true;
+function configureRevenueCat() {
+  if (isConfigured) return true;
+  
+  try {
+    const apiKey = getRCApiKey();
+    if (apiKey) {
+      console.log('Configuring RevenueCat with API key');
+      Purchases.configure({ apiKey });
+      isConfigured = true;
+      return true;
+    }
+  } catch (error) {
+    console.log('Error configuring RevenueCat:', error);
+  }
+  return false;
 }
 
 export interface SubscriptionPackage {
@@ -138,40 +148,46 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [authUser, setAuthUser] = useState<{ uid: string; displayName: string | null; email: string } | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [rcConfigured, setRcConfigured] = useState(false);
   const notificationSentRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (authUser && isConfigured) {
+    const configured = configureRevenueCat();
+    setRcConfigured(configured);
+  }, []);
+
+  useEffect(() => {
+    if (authUser && rcConfigured) {
       console.log('Logging in to RevenueCat with user:', authUser.uid);
       Purchases.logIn(authUser.uid).catch(err => {
         console.log('RevenueCat login error:', err);
       });
     }
-  }, [authUser]);
+  }, [authUser, rcConfigured]);
 
   const customerInfoQuery = useQuery({
-    queryKey: ['customerInfo'],
+    queryKey: ['customerInfo', rcConfigured],
     queryFn: async () => {
-      if (!isConfigured) return null;
+      if (!rcConfigured) return null;
       console.log('Fetching customer info...');
       const info = await Purchases.getCustomerInfo();
       console.log('Customer info:', info.entitlements.active);
       return info;
     },
-    enabled: !!authUser && isConfigured,
+    enabled: !!authUser && rcConfigured,
     staleTime: 1000 * 60 * 5,
   });
 
   const offeringsQuery = useQuery({
-    queryKey: ['offerings'],
+    queryKey: ['offerings', rcConfigured],
     queryFn: async () => {
-      if (!isConfigured) return null;
+      if (!rcConfigured) return null;
       console.log('Fetching offerings...');
       const offerings = await Purchases.getOfferings();
       console.log('Offerings:', offerings.current?.availablePackages.length, 'packages');
       return offerings;
     },
-    enabled: isConfigured,
+    enabled: rcConfigured,
     staleTime: 1000 * 60 * 30,
   });
 

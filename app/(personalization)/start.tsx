@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,16 +44,22 @@ export default function StartScreen() {
       />
       
       <SafeAreaView style={styles.safeArea}>
-        <Animated.View 
-          style={[
-            styles.content,
-            { 
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }, { scale: scaleAnim }]
-            }
-          ]}
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
         >
-          <View style={styles.heroSection}>
+          <Animated.View 
+            style={[
+              styles.content,
+              { 
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }, { scale: scaleAnim }]
+              }
+            ]}
+          >
+            <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
               <LinearGradient
                 colors={['#00C853', '#00A844']}
@@ -76,7 +82,7 @@ export default function StartScreen() {
             </Text>
           </View>
 
-          <View style={styles.featuresContainer}>
+            <View style={styles.featuresContainer}>
             <FeatureItem 
               icon={<Target size={24} color={Colors.primary} />}
               title="Personalized Drills"
@@ -92,35 +98,36 @@ export default function StartScreen() {
               title="Track Progress"
               description="See your skills improve over time"
             />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Let's Get Started"
-              onPress={() => router.push('/(personalization)/name')}
-              size="large"
-              testID="start-personalization-button"
-            />
-            
-            <Text style={styles.timeText}>
-              ⏱ Takes only 1 minute
-            </Text>
-
-            <View style={styles.legalLinks}>
-              <TouchableOpacity 
-                onPress={() => Linking.openURL('https://factual-headstand-dcf.notion.site/Ronaldify-Privacy-Policy-2fbb9d755c118040aca3f5e890ab22a4')}
-              >
-                <Text style={styles.legalLinkText}>Privacy Policy</Text>
-              </TouchableOpacity>
-              <Text style={styles.legalDivider}>•</Text>
-              <TouchableOpacity 
-                onPress={() => Linking.openURL('https://factual-headstand-dcf.notion.site/Ronaldify-Terms-of-Service-2fbb9d755c11806fa894fcc080a8b8ea?pvs=73')}
-              >
-                <Text style={styles.legalLinkText}>Terms of Service</Text>
-              </TouchableOpacity>
             </View>
-          </View>
-        </Animated.View>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Let's Get Started"
+                onPress={() => router.push('/(personalization)/name')}
+                size="large"
+                testID="start-personalization-button"
+              />
+              
+              <Text style={styles.timeText}>
+                ⏱ Takes only 1 minute
+              </Text>
+
+              <View style={styles.legalLinks}>
+                <TouchableOpacity 
+                  onPress={() => Linking.openURL('https://factual-headstand-dcf.notion.site/Ronaldify-Privacy-Policy-2fbb9d755c118040aca3f5e890ab22a4')}
+                >
+                  <Text style={styles.legalLinkText}>Privacy Policy</Text>
+                </TouchableOpacity>
+                <Text style={styles.legalDivider}>•</Text>
+                <TouchableOpacity 
+                  onPress={() => Linking.openURL('https://factual-headstand-dcf.notion.site/Ronaldify-Terms-of-Service-2fbb9d755c11806fa894fcc080a8b8ea?pvs=73')}
+                >
+                  <Text style={styles.legalLinkText}>Terms of Service</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Animated.View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -154,11 +161,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    minHeight: height - 100,
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'space-between',
-    paddingTop: height * 0.05,
+    paddingTop: 20,
     paddingBottom: 20,
   },
   heroSection: {

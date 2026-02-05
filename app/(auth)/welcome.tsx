@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,7 +19,12 @@ export default function WelcomeScreen() {
       />
       
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
           <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
               <Text style={styles.logoEmoji}>⚽</Text>
@@ -52,7 +57,7 @@ export default function WelcomeScreen() {
               By continuing, you agree to our Terms of Service and Privacy Policy
             </Text>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -75,10 +80,14 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 24,
     justifyContent: 'space-between',
+    minHeight: height - 100,
   },
   heroSection: {
     alignItems: 'center',

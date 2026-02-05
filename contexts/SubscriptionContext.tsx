@@ -40,13 +40,19 @@ function configureRevenueCat() {
     } else {
       console.log('No RevenueCat API key available for platform:', Platform.OS);
     }
-  } catch (error) {
-    console.log('Error configuring RevenueCat:', error);
+  } catch (error: any) {
+    console.log('Error configuring RevenueCat (likely Expo Go):', error?.message || error);
+    isConfigured = false;
   }
   return false;
 }
 
-const rcConfiguredAtTopLevel = configureRevenueCat();
+let rcConfiguredAtTopLevel = false;
+try {
+  rcConfiguredAtTopLevel = configureRevenueCat();
+} catch (e) {
+  console.log('RevenueCat top-level config failed (Expo Go environment)');
+}
 console.log('RevenueCat top-level configuration result:', rcConfiguredAtTopLevel);
 
 export interface SubscriptionPackage {
@@ -166,9 +172,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!rcConfigured) {
       console.log('RevenueCat not configured at top level, retrying...');
-      const configured = configureRevenueCat();
-      console.log('RevenueCat retry result:', configured);
-      setRcConfigured(configured);
+      try {
+        const configured = configureRevenueCat();
+        console.log('RevenueCat retry result:', configured);
+        setRcConfigured(configured);
+      } catch (e) {
+        console.log('RevenueCat retry failed (Expo Go environment)');
+      }
     } else {
       console.log('RevenueCat already configured at top level');
     }

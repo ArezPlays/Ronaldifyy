@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 import Button from '@/components/Button';
 
-const { height } = Dimensions.get('window');
+
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -86,12 +86,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    justifyContent: 'space-between',
-    minHeight: height - 100,
+    paddingTop: 40,
+    paddingBottom: 24,
   },
   heroSection: {
     alignItems: 'center',
-    marginTop: height * 0.08,
+    marginBottom: 32,
   },
   logoContainer: {
     width: 120,
@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     gap: 16,
+    marginBottom: 32,
   },
   featureItem: {
     flexDirection: 'row',

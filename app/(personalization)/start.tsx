@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions, TouchableOpacity, Linking, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Animated, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { Sparkles, Target, Trophy } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import Button from '@/components/Button';
 
-const { height } = Dimensions.get('window');
+
 
 export default function StartScreen() {
   const router = useRouter();
@@ -166,17 +166,16 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    minHeight: height - 100,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 24,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'space-between',
-    paddingTop: 20,
-    paddingBottom: 20,
   },
   heroSection: {
     alignItems: 'center',
+    marginBottom: 24,
   },
   logoContainer: {
     position: 'relative',
@@ -225,6 +224,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     gap: 20,
+    marginBottom: 24,
   },
   featureItem: {
     flexDirection: 'row',

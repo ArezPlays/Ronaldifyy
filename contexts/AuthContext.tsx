@@ -22,8 +22,8 @@ interface AuthState {
 
 const AUTH_STORAGE_KEY = '@ronaldify_auth_user';
 
-const GOOGLE_CLIENT_ID_WEB = ''; 
-const GOOGLE_CLIENT_ID_IOS = '';
+const GOOGLE_CLIENT_ID_WEB = '';
+const GOOGLE_CLIENT_ID_IOS = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
 const GOOGLE_CLIENT_ID_ANDROID = '';
 
 function getGoogleClientId() {
@@ -152,11 +152,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const signInWithGoogle = useCallback(async (): Promise<AuthUser> => {
     console.log('Starting Google Sign In...');
+    console.log('Platform:', Platform.OS);
     
     const clientId = getGoogleClientId();
+    console.log('Google Client ID available:', !!clientId);
     
     if (!clientId) {
       console.log('Google Client ID not configured, using demo mode');
+      // Only use demo mode on web - on native devices, throw an error
+      if (Platform.OS !== 'web') {
+        throw new Error('Google Sign-In is not configured for this platform');
+      }
       const demoUser: AuthUser = {
         uid: `google_demo_${Date.now()}`,
         email: 'demo@gmail.com',
@@ -175,11 +181,15 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
 
     try {
+      // For iOS, use the reversed client ID as the scheme for proper redirect
+      const iosScheme = 'com.googleusercontent.apps.199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9';
       const redirectUri = AuthSession.makeRedirectUri({
-        scheme: 'rork-app',
+        scheme: Platform.OS === 'ios' ? iosScheme : 'rork-app',
+        path: Platform.OS === 'ios' ? '' : undefined,
       });
       
       console.log('Google redirect URI:', redirectUri);
+      console.log('Using client ID:', clientId);
 
       const state = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,

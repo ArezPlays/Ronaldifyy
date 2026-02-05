@@ -108,6 +108,8 @@ const MOCK_PACKAGES: SubscriptionPackage[] = [
   },
 ];
 
+const isNativeDevice = Platform.OS === 'ios' || Platform.OS === 'android';
+
 async function getNotifiedTransactions(): Promise<Set<string>> {
   try {
     const stored = await AsyncStorage.getItem(NOTIFIED_TRANSACTIONS_KEY);
@@ -152,8 +154,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const notificationSentRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    const configured = configureRevenueCat();
-    setRcConfigured(configured);
+    const configure = async () => {
+      console.log('Initializing RevenueCat...');
+      console.log('Platform:', Platform.OS);
+      console.log('Is __DEV__:', __DEV__);
+      const apiKey = getRCApiKey();
+      console.log('API Key available:', !!apiKey, 'Length:', apiKey?.length);
+      const configured = configureRevenueCat();
+      console.log('RevenueCat configured:', configured);
+      setRcConfigured(configured);
+    };
+    configure();
   }, []);
 
   useEffect(() => {
@@ -181,14 +192,34 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const offeringsQuery = useQuery({
     queryKey: ['offerings', rcConfigured],
     queryFn: async () => {
-      if (!rcConfigured) return null;
-      console.log('Fetching offerings...');
-      const offerings = await Purchases.getOfferings();
-      console.log('Offerings:', offerings.current?.availablePackages.length, 'packages');
-      return offerings;
+      if (!rcConfigured) {
+        console.log('RevenueCat not configured, cannot fetch offerings');
+        return null;
+      }
+      console.log('Fetching offerings from RevenueCat...');
+      console.log('Platform:', Platform.OS, '__DEV__:', __DEV__);
+      try {
+        const offerings = await Purchases.getOfferings();
+        console.log('Offerings response:', JSON.stringify({
+          current: offerings.current?.identifier,
+          packagesCount: offerings.current?.availablePackages.length,
+          packages: offerings.current?.availablePackages.map(p => ({
+            id: p.identifier,
+            type: p.packageType,
+            product: p.product.identifier,
+            price: p.product.priceString
+          }))
+        }));
+        return offerings;
+      } catch (error) {
+        console.log('Error fetching offerings:', error);
+        throw error;
+      }
     },
     enabled: rcConfigured,
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const sendSubscriptionNotification = useCallback(async (
@@ -293,7 +324,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   })) || [];
 
   const hasRealPackages = packages.length > 0;
-  const displayPackages = hasRealPackages ? packages : MOCK_PACKAGES;
+  // On native devices (TestFlight/App Store), only show real packages - never mock
+  // Mock packages are only for web/development preview
+  const displayPackages = hasRealPackages ? packages : (isNativeDevice && !__DEV__ ? [] : MOCK_PACKAGES);
   
   const sortedPackages = [...displayPackages].sort((a, b) => {
     const order: Record<string, number> = { '$rc_weekly': 0, '$rc_monthly': 1, '$rc_annual': 2 };

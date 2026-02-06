@@ -100,6 +100,7 @@ export default function LoginScreen() {
             <Text style={styles.termsText}>
               By continuing, you agree to our Terms of Service and Privacy Policy
             </Text>
+            <Text style={styles.madeByText}>Made By Arez :)</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -155,5 +156,13 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  madeByText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontWeight: '700' as const,
+    marginTop: 14,
+    letterSpacing: 0.5,
   },
 });

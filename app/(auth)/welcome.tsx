@@ -56,8 +56,7 @@ export default function WelcomeScreen() {
             <Text style={styles.termsText}>
               By continuing, you agree to our Terms of Service and Privacy Policy
             </Text>
-            <Text style={styles.madeByText}>Made By Arez :)</Text>
-            <View style={{ height: 16 }} />
+
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -167,14 +166,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
-  madeByText: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginTop: 16,
-    marginBottom: 10,
-    fontWeight: '700' as const,
-    opacity: 1,
-    letterSpacing: 0.5,
-  },
+
 });

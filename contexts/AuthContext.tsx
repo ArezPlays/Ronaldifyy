@@ -23,19 +23,9 @@ interface AuthState {
 
 const AUTH_STORAGE_KEY = '@ronaldify_auth_user';
 
-const GOOGLE_CLIENT_ID_WEB = '';
+const GOOGLE_CLIENT_ID_WEB = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 const GOOGLE_CLIENT_ID_IOS = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
-
-
-function getGoogleClientId() {
-  if (Platform.OS === 'android') {
-    return GOOGLE_CLIENT_ID_IOS;
-  }
-  return Platform.select({
-    ios: GOOGLE_CLIENT_ID_IOS,
-    default: GOOGLE_CLIENT_ID_WEB || GOOGLE_CLIENT_ID_IOS,
-  });
-}
+const GOOGLE_CLIENT_ID_ANDROID = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [state, setState] = useState<AuthState>({
@@ -156,37 +146,18 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const signInWithGoogle = useCallback(async (): Promise<AuthUser> => {
     console.log('Starting Google Sign In...');
     console.log('Platform:', Platform.OS);
-    
-    const clientId = getGoogleClientId();
-    console.log('Google Client ID available:', !!clientId);
-    
-    if (!clientId) {
-      console.log('Google Client ID not configured, using demo mode');
-      // Only use demo mode on web - on native devices, throw an error
-      if (Platform.OS !== 'web') {
-        throw new Error('Google Sign-In is not configured for this platform');
-      }
-      const demoUser: AuthUser = {
-        uid: `google_demo_${Date.now()}`,
-        email: 'demo@gmail.com',
-        displayName: 'Demo User',
-        photoURL: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop',
-        provider: 'google',
-      };
-      
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(demoUser));
-      setState({
-        user: demoUser,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-      return demoUser;
-    }
 
     try {
-      const redirectUri = Platform.OS === 'android'
-        ? AuthSession.makeRedirectUri({ scheme: 'rork-app' })
-        : "com.googleusercontent.apps.199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9:/oauth2redirect";
+      const redirectUri = AuthSession.makeRedirectUri({
+        scheme: 'rork-app',
+        path: 'redirect',
+      });
+
+      const clientId = Platform.select({
+        ios: GOOGLE_CLIENT_ID_IOS,
+        android: GOOGLE_CLIENT_ID_ANDROID,
+        default: GOOGLE_CLIENT_ID_WEB,
+      }) as string;
       
       console.log('Google redirect URI:', redirectUri);
       console.log('Using client ID:', clientId);
@@ -198,32 +169,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         clientId,
         redirectUri,
         scopes: ['openid', 'profile', 'email'],
-        responseType: AuthSession.ResponseType.Code,
-        usePKCE: true,
+        responseType: AuthSession.ResponseType.Token,
+        usePKCE: false,
       });
 
       const result = await authRequest.promptAsync(discovery);
       
       console.log('Google auth result type:', result.type);
 
-      if (result.type === 'success' && result.params?.code) {
-        const code = result.params.code;
-        console.log('Got authorization code, exchanging for tokens...');
-
-        const tokenResponse = await AuthSession.exchangeCodeAsync(
-          {
-            clientId,
-            code,
-            redirectUri,
-            extraParams: {
-              code_verifier: authRequest.codeVerifier || '',
-            },
-          },
-          discovery
-        );
-
-        console.log('Token exchange successful');
-        const accessToken = tokenResponse.accessToken;
+      if (result.type === 'success' && result.params?.access_token) {
+        const accessToken = result.params.access_token;
+        console.log('Got access token directly from implicit flow');
         
         const userInfoResponse = await fetch(
           'https://www.googleapis.com/oauth2/v2/userinfo',

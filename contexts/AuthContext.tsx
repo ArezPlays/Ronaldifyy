@@ -25,7 +25,7 @@ const AUTH_STORAGE_KEY = '@ronaldify_auth_user';
 
 const GOOGLE_CLIENT_ID_WEB = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 const GOOGLE_CLIENT_ID_IOS = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
-const GOOGLE_CLIENT_ID_ANDROID = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID_ANDROID = '199378159937-ulffcp9qvnuktuqstg4u5j3qgqjqtv5i.apps.googleusercontent.com';
 
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [state, setState] = useState<AuthState>({
@@ -148,10 +148,11 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     console.log('Platform:', Platform.OS);
 
     try {
-      const redirectUri = AuthSession.makeRedirectUri({
-        scheme: 'rork-app',
-        path: 'redirect',
-      });
+      const isAndroid = Platform.OS === 'android';
+
+      const redirectUri = isAndroid
+        ? AuthSession.makeRedirectUri({ native: `com.googleusercontent.apps.199378159937-ulffcp9qvnuktuqstg4u5j3qgqjqtv5i:/oauthredirect` })
+        : AuthSession.makeRedirectUri({ scheme: 'rork-app', path: 'redirect' });
 
       const clientId = Platform.select({
         ios: GOOGLE_CLIENT_ID_IOS,
@@ -169,17 +170,32 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         clientId,
         redirectUri,
         scopes: ['openid', 'profile', 'email'],
-        responseType: AuthSession.ResponseType.Token,
-        usePKCE: false,
+        responseType: isAndroid ? AuthSession.ResponseType.Code : AuthSession.ResponseType.Token,
+        usePKCE: isAndroid,
       });
 
       const result = await authRequest.promptAsync(discovery);
       
       console.log('Google auth result type:', result.type);
 
-      if (result.type === 'success' && result.params?.access_token) {
-        const accessToken = result.params.access_token;
-        console.log('Got access token directly from implicit flow');
+      if (result.type === 'success' && (result.params?.access_token || result.params?.code)) {
+        let accessToken = result.params.access_token;
+
+        if (!accessToken && result.params.code && isAndroid) {
+          console.log('Android: exchanging auth code for token...');
+          const tokenResponse = await AuthSession.exchangeCodeAsync(
+            {
+              clientId,
+              code: result.params.code,
+              redirectUri,
+              extraParams: { code_verifier: authRequest.codeVerifier || '' },
+            },
+            discovery
+          );
+          accessToken = tokenResponse.accessToken;
+        }
+
+        console.log('Got access token');
         
         const userInfoResponse = await fetch(
           'https://www.googleapis.com/oauth2/v2/userinfo',

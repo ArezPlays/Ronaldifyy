@@ -144,43 +144,55 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   }, []);
 
   const signInWithGoogle = useCallback(async (): Promise<AuthUser> => {
-    console.log('Starting Google Sign In...');
-    console.log('Platform:', Platform.OS);
+    console.log('[GoogleAuth] Starting Google Sign In...');
+    console.log('[GoogleAuth] Platform:', Platform.OS, '__DEV__:', __DEV__);
 
     try {
-      const isAndroidStandalone = Platform.OS === 'android' && !__DEV__;
+      const isExpoGo = !!(__DEV__);
       const isAndroid = Platform.OS === 'android';
-      const isExpoGo = __DEV__;
+      const isIOS = Platform.OS === 'ios';
+      const isAndroidStandalone = isAndroid && !isExpoGo;
 
       let redirectUri: string;
       let clientId: string;
-      let useProxy = false;
 
-      if (isAndroid && !isExpoGo) {
+      if (isAndroidStandalone) {
+        clientId = GOOGLE_CLIENT_ID_ANDROID;
+        redirectUri = AuthSession.makeRedirectUri({
+          native: 'app.rork.ronaldify_5ml8ava:/oauth2redirect',
+        });
+      } else if (isAndroid && isExpoGo) {
+        clientId = GOOGLE_CLIENT_ID_WEB;
         redirectUri = AuthSession.makeRedirectUri({
           scheme: 'rork-app',
-          path: 'oauth2redirect',
+          path: 'redirect',
         });
-        clientId = GOOGLE_CLIENT_ID_ANDROID;
-      } else if (isAndroid && isExpoGo) {
-        redirectUri = AuthSession.makeRedirectUri({ scheme: 'rork-app', path: 'redirect' });
-        clientId = GOOGLE_CLIENT_ID_WEB;
-        useProxy = true;
-      } else if (Platform.OS === 'ios') {
-        redirectUri = AuthSession.makeRedirectUri({ scheme: 'rork-app', path: 'redirect' });
+      } else if (isIOS) {
         clientId = GOOGLE_CLIENT_ID_IOS;
+        redirectUri = AuthSession.makeRedirectUri({
+          scheme: 'rork-app',
+          path: 'redirect',
+        });
       } else {
-        redirectUri = AuthSession.makeRedirectUri({ scheme: 'rork-app', path: 'redirect' });
         clientId = GOOGLE_CLIENT_ID_WEB;
+        redirectUri = AuthSession.makeRedirectUri({
+          scheme: 'rork-app',
+          path: 'redirect',
+        });
       }
 
-      console.log('Google redirect URI:', redirectUri);
-      console.log('Using client ID:', clientId);
-      console.log('Platform:', Platform.OS, 'isExpoGo:', isExpoGo);
+      console.log('[GoogleAuth] Client ID:', clientId);
+      console.log('[GoogleAuth] Redirect URI:', redirectUri);
+      console.log('[GoogleAuth] isAndroidStandalone:', isAndroidStandalone);
 
-      const discovery = await AuthSession.fetchDiscoveryAsync('https://accounts.google.com');
+      const discovery: AuthSession.DiscoveryDocument = {
+        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+        tokenEndpoint: 'https://oauth2.googleapis.com/token',
+        revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+      };
 
-      const useCodeFlow = isAndroid && !isExpoGo;
+      const useCodeFlow = isAndroidStandalone;
+      console.log('[GoogleAuth] Using code flow:', useCodeFlow);
 
       const authRequest = new AuthSession.AuthRequest({
         clientId,
@@ -188,40 +200,57 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         scopes: ['openid', 'profile', 'email'],
         responseType: useCodeFlow ? AuthSession.ResponseType.Code : AuthSession.ResponseType.Token,
         usePKCE: useCodeFlow,
+        ...(useCodeFlow ? { prompt: AuthSession.Prompt.SelectAccount } : {}),
       });
 
+      console.log('[GoogleAuth] Prompting user...');
       const result = await authRequest.promptAsync(discovery);
-      
-      console.log('Google auth result type:', result.type);
+      console.log('[GoogleAuth] Result type:', result.type);
+      console.log('[GoogleAuth] Result params:', JSON.stringify(result.type === 'success' ? result.params : {}));
 
-      if (result.type === 'success' && (result.params?.access_token || result.params?.code)) {
-        let accessToken = result.params.access_token;
+      if (result.type === 'success') {
+        let accessToken = result.params?.access_token;
 
-        if (!accessToken && result.params.code && isAndroid) {
-          console.log('Android: exchanging auth code for token...');
+        if (!accessToken && result.params?.code) {
+          console.log('[GoogleAuth] Exchanging auth code for tokens...');
+          console.log('[GoogleAuth] Code verifier present:', !!authRequest.codeVerifier);
+          
           const tokenResponse = await AuthSession.exchangeCodeAsync(
             {
               clientId,
               code: result.params.code,
               redirectUri,
-              extraParams: { code_verifier: authRequest.codeVerifier || '' },
+              extraParams: {
+                code_verifier: authRequest.codeVerifier || '',
+              },
             },
             discovery
           );
+          console.log('[GoogleAuth] Token exchange successful, got access token:', !!tokenResponse.accessToken);
           accessToken = tokenResponse.accessToken;
         }
 
-        console.log('Got access token');
-        
+        if (!accessToken) {
+          console.log('[GoogleAuth] No access token obtained');
+          throw new Error('Failed to obtain access token from Google');
+        }
+
+        console.log('[GoogleAuth] Fetching user info...');
         const userInfoResponse = await fetch(
           'https://www.googleapis.com/oauth2/v2/userinfo',
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
-        
+
+        if (!userInfoResponse.ok) {
+          const errorText = await userInfoResponse.text();
+          console.log('[GoogleAuth] User info fetch failed:', errorText);
+          throw new Error('Failed to fetch Google user info');
+        }
+
         const userInfo = await userInfoResponse.json();
-        console.log('Google user info:', userInfo);
+        console.log('[GoogleAuth] User info received:', JSON.stringify({ id: userInfo.id, email: userInfo.email, name: userInfo.name }));
 
         const user: AuthUser = {
           uid: `google_${userInfo.id}`,
@@ -232,7 +261,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         };
 
         await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-        
+        console.log('[GoogleAuth] User saved successfully');
+
         setState({
           user,
           isLoading: false,
@@ -240,13 +270,14 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         });
 
         return user;
-      } else if (result.type === 'cancel') {
+      } else if (result.type === 'cancel' || result.type === 'dismiss') {
         throw new Error('Sign in was cancelled');
       } else {
+        console.log('[GoogleAuth] Unexpected result type:', result.type);
         throw new Error('Google sign in failed');
       }
     } catch (error: any) {
-      console.log('Google Sign In error:', error);
+      console.log('[GoogleAuth] Error:', error?.message || error);
       throw error;
     }
   }, []);

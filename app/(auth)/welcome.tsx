@@ -166,11 +166,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   madeByText: {
-    fontSize: 11,
-    color: Colors.textMuted,
+    fontSize: 12,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    marginTop: 12,
-    opacity: 0.5,
+    marginTop: 8,
+    opacity: 0.7,
     fontWeight: '500' as const,
   },
 });

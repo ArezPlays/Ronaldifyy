@@ -51,6 +51,7 @@ export default function LoginScreen() {
   };
 
   const showApple = Platform.OS === 'ios';
+  console.log('[Login] Rendering login screen, showApple:', showApple);
 
   return (
     <View style={styles.container}>

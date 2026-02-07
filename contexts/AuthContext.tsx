@@ -88,7 +88,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     isAuthenticated: false,
   });
 
-  const WEB_CLIENT_ID = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
+  const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID || '1040380279539-d0dqak4a9oh32uab5utpehbogfpnpaab.apps.googleusercontent.com';
+  const IOS_CLIENT_ID = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
   const ANDROID_CLIENT_ID = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 
   let redirectUri = '';
@@ -100,7 +101,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         });
       } else if (Platform.OS === 'ios') {
         redirectUri = makeRedirectUri({
-          native: `com.googleusercontent.apps.199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9:/oauthredirect`,
+          native: `com.googleusercontent.apps.${IOS_CLIENT_ID.split('.apps.')[0]}:/oauthredirect`,
         });
       }
     }
@@ -110,7 +111,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   const googleConfig: any = {
     webClientId: WEB_CLIENT_ID,
-    iosClientId: WEB_CLIENT_ID,
+    iosClientId: IOS_CLIENT_ID,
     androidClientId: ANDROID_CLIENT_ID,
     expoClientId: WEB_CLIENT_ID,
     scopes: ['openid', 'profile', 'email'],

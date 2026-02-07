@@ -27,7 +27,7 @@ const AUTH_STORAGE_KEY = '@ronaldify_auth_user';
 
 const GOOGLE_CLIENT_ID_WEB = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 const GOOGLE_CLIENT_ID_IOS = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
-const GOOGLE_CLIENT_ID_ANDROID = '199378159937-ulffcp9qvnuktuqstg4u5j3qgqjqtv5i.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID_ANDROID = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 
 export const [AuthProvider, useAuth] = createContextHook(() => {
   const [state, setState] = useState<AuthState>({
@@ -160,7 +160,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         redirectUri = `com.googleusercontent.apps.${iosClientIdNumber}-${iosClientIdSuffix}:/oauth2redirect`;
         console.log('[GoogleAuth] iOS redirect URI:', redirectUri);
       } else if (Platform.OS === 'android') {
-        clientId = GOOGLE_CLIENT_ID_WEB;
+        clientId = GOOGLE_CLIENT_ID_ANDROID;
         redirectUri = AuthSession.makeRedirectUri();
         console.log('[GoogleAuth] Android redirect URI:', redirectUri);
       } else {

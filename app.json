@@ -39,7 +39,7 @@
           "action": "VIEW",
           "data": [
             {
-              "scheme": "rork-app",
+              "scheme": "app.rork.ronaldify_5ml8ava",
               "host": "oauth2redirect"
             }
           ],

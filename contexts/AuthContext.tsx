@@ -97,7 +97,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     if (makeRedirectUri) {
       if (Platform.OS === 'android') {
         redirectUri = makeRedirectUri({
-          native: 'rork-app://oauth2redirect',
+          native: 'app.rork.ronaldify_5ml8ava://oauth2redirect',
         });
       } else if (Platform.OS === 'ios') {
         redirectUri = makeRedirectUri({

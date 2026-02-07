@@ -33,19 +33,6 @@
         "backgroundColor": "#ffffff"
       },
       "package": "app.rork.ronaldify_5ml8ava",
-      "versionCode": 8,
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "app.rork.ronaldify_5ml8ava",
-              "host": "oauth2redirect"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

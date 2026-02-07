@@ -92,7 +92,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   try {
     if (makeRedirectUri) {
       redirectUri = makeRedirectUri({
-        native: 'app.rork.ronaldify_5ml8ava://oauth2redirect',
+        native: 'rork-app://oauth2redirect',
       });
     }
   } catch (e: any) {

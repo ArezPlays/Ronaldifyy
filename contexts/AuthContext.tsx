@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
+import * as AuthSession from 'expo-auth-session';
+import * as Crypto from 'expo-crypto';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -144,77 +145,147 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
-  const [, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_CLIENT_ID_WEB,
-    iosClientId: GOOGLE_CLIENT_ID_IOS,
-    androidClientId: GOOGLE_CLIENT_ID_ANDROID,
-    scopes: ['openid', 'profile', 'email'],
-  });
-
-  const processGoogleResponse = useCallback(async (authentication: { accessToken: string }): Promise<AuthUser> => {
-    console.log('[GoogleAuth] Fetching user info with access token...');
-    const userInfoResponse = await fetch(
-      'https://www.googleapis.com/oauth2/v2/userinfo',
-      { headers: { Authorization: `Bearer ${authentication.accessToken}` } }
-    );
-
-    if (!userInfoResponse.ok) {
-      const errorText = await userInfoResponse.text();
-      console.log('[GoogleAuth] User info fetch failed:', errorText);
-      throw new Error('Failed to fetch Google user info');
-    }
-
-    const userInfo = await userInfoResponse.json();
-    console.log('[GoogleAuth] User info received:', JSON.stringify({ id: userInfo.id, email: userInfo.email, name: userInfo.name }));
-
-    const user: AuthUser = {
-      uid: `google_${userInfo.id}`,
-      email: userInfo.email || 'unknown@gmail.com',
-      displayName: userInfo.name || userInfo.email?.split('@')[0] || 'Google User',
-      photoURL: userInfo.picture || null,
-      provider: 'google',
-    };
-
-    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    console.log('[GoogleAuth] User saved successfully');
-
-    setState({
-      user,
-      isLoading: false,
-      isAuthenticated: true,
-    });
-
-    return user;
-  }, []);
-
-  const googleResolveRef = useCallback(() => ({ current: null as ((user: AuthUser) => void) | null }), [])();
-  const googleRejectRef = useCallback(() => ({ current: null as ((error: Error) => void) | null }), [])();
-
-  useEffect(() => {
-    if (googleResponse?.type === 'success' && googleResponse.authentication?.accessToken) {
-      console.log('[GoogleAuth] Got successful response, processing...');
-      processGoogleResponse(googleResponse.authentication)
-        .then((user) => googleResolveRef.current?.(user))
-        .catch((err) => googleRejectRef.current?.(err));
-    } else if (googleResponse?.type === 'cancel' || googleResponse?.type === 'dismiss') {
-      console.log('[GoogleAuth] User cancelled');
-      googleRejectRef.current?.(new Error('Sign in was cancelled'));
-    } else if (googleResponse?.type === 'error') {
-      console.log('[GoogleAuth] Error response:', googleResponse.error);
-      googleRejectRef.current?.(new Error(googleResponse.error?.message || 'Google sign in failed'));
-    }
-  }, [googleResponse, processGoogleResponse, googleResolveRef, googleRejectRef]);
-
   const signInWithGoogle = useCallback(async (): Promise<AuthUser> => {
     console.log('[GoogleAuth] Starting Google Sign In...');
     console.log('[GoogleAuth] Platform:', Platform.OS);
 
-    return new Promise<AuthUser>((resolve, reject) => {
-      googleResolveRef.current = resolve;
-      googleRejectRef.current = reject;
-      googlePromptAsync().catch(reject);
-    });
-  }, [googlePromptAsync, googleResolveRef, googleRejectRef]);
+    try {
+      let clientId = GOOGLE_CLIENT_ID_WEB;
+      let redirectUri = '';
+
+      if (Platform.OS === 'ios') {
+        clientId = GOOGLE_CLIENT_ID_IOS;
+        const iosClientIdNumber = GOOGLE_CLIENT_ID_IOS.split('-')[0];
+        const iosClientIdSuffix = GOOGLE_CLIENT_ID_IOS.split('-')[1].split('.')[0];
+        redirectUri = `com.googleusercontent.apps.${iosClientIdNumber}-${iosClientIdSuffix}:/oauth2redirect`;
+        console.log('[GoogleAuth] iOS redirect URI:', redirectUri);
+      } else if (Platform.OS === 'android') {
+        clientId = GOOGLE_CLIENT_ID_ANDROID;
+        redirectUri = 'app.rork.ronaldify_5ml8ava:/oauth2redirect';
+        console.log('[GoogleAuth] Android redirect URI:', redirectUri);
+      } else {
+        redirectUri = AuthSession.makeRedirectUri();
+        console.log('[GoogleAuth] Web redirect URI:', redirectUri);
+      }
+
+      const randomBytes = await Crypto.getRandomBytesAsync(32);
+      const codeVerifier = Array.from(randomBytes)
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 128);
+      
+      const codeChallenge = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        codeVerifier,
+        { encoding: Crypto.CryptoEncoding.BASE64 }
+      );
+      const codeChallengeFormatted = codeChallenge
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+
+      const state = Crypto.randomUUID();
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: 'openid profile email',
+        code_challenge: codeChallengeFormatted,
+        code_challenge_method: 'S256',
+        state: state,
+      }).toString()}`;
+
+      console.log('[GoogleAuth] Opening auth URL...');
+      console.log('[GoogleAuth] Client ID:', clientId);
+
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+      console.log('[GoogleAuth] Auth session result:', result.type);
+
+      if (result.type === 'cancel' || result.type === 'dismiss') {
+        throw new Error('Sign in was cancelled');
+      }
+
+      if (result.type !== 'success') {
+        throw new Error('Authentication failed');
+      }
+
+      const url = result.url;
+      const params = new URLSearchParams(url.split('?')[1]);
+      const code = params.get('code');
+      const returnedState = params.get('state');
+
+      if (!code) {
+        throw new Error('No authorization code received');
+      }
+
+      if (returnedState !== state) {
+        throw new Error('State mismatch - possible CSRF attack');
+      }
+
+      console.log('[GoogleAuth] Got authorization code, exchanging for token...');
+
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: clientId,
+          code: code,
+          code_verifier: codeVerifier,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUri,
+        }).toString(),
+      });
+
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.log('[GoogleAuth] Token exchange failed:', errorText);
+        throw new Error('Failed to exchange authorization code');
+      }
+
+      const tokenData = await tokenResponse.json();
+      console.log('[GoogleAuth] Token exchange successful');
+
+      const userInfoResponse = await fetch(
+        'https://www.googleapis.com/oauth2/v2/userinfo',
+        { headers: { Authorization: `Bearer ${tokenData.access_token}` } }
+      );
+
+      if (!userInfoResponse.ok) {
+        const errorText = await userInfoResponse.text();
+        console.log('[GoogleAuth] User info fetch failed:', errorText);
+        throw new Error('Failed to fetch Google user info');
+      }
+
+      const userInfo = await userInfoResponse.json();
+      console.log('[GoogleAuth] User info received:', JSON.stringify({ id: userInfo.id, email: userInfo.email, name: userInfo.name }));
+
+      const user: AuthUser = {
+        uid: `google_${userInfo.id}`,
+        email: userInfo.email || 'unknown@gmail.com',
+        displayName: userInfo.name || userInfo.email?.split('@')[0] || 'Google User',
+        photoURL: userInfo.picture || null,
+        provider: 'google',
+      };
+
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+      console.log('[GoogleAuth] User saved successfully');
+
+      setState({
+        user,
+        isLoading: false,
+        isAuthenticated: true,
+      });
+
+      return user;
+    } catch (error: any) {
+      console.log('[GoogleAuth] Error:', error);
+      throw error;
+    }
+  }, []);
 
   const signInWithEmail = useCallback(async (email: string, password: string): Promise<AuthUser> => {
     console.log('Signing in with email:', email);

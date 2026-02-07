@@ -24,7 +24,7 @@ import { POSITIONS } from '@/constants/positions';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isGuest } = useAuth();
   const { profile } = useUser();
   const { isPro } = useSubscription();
   const { colors } = useTheme();
@@ -85,7 +85,7 @@ export default function ProfileScreen() {
             
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{profile?.name || t.player}</Text>
-              <Text style={styles.profileEmail}>{user?.email || ''}</Text>
+              <Text style={styles.profileEmail}>{isGuest ? 'Local account' : (user?.email || '')}</Text>
               <View style={styles.profileTags}>
                 <View style={styles.profileTag}>
                   <Text style={styles.profileTagText}>{positionLabel}</Text>
@@ -178,7 +178,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
             <LogOut size={20} color={colors.error} />
-            <Text style={styles.signOutText}>{t.signOut}</Text>
+            <Text style={styles.signOutText}>{isGuest ? 'Reset & Sign Out' : t.signOut}</Text>
           </TouchableOpacity>
 
           <View style={styles.versionContainer}>

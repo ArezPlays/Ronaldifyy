@@ -11,42 +11,46 @@ import {
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Apple, Chrome, ChevronLeft } from 'lucide-react-native';
+import { Apple, ChevronLeft, ArrowRight } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import SocialButton from '@/components/SocialButton';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { signInWithApple, signInWithGoogle } = useAuth();
+  const { signInWithApple, continueAsGuest } = useAuth();
   
-  const [loading, setLoading] = useState<'apple' | 'google' | null>(null);
+  const [loading, setLoading] = useState<'apple' | 'guest' | null>(null);
 
   const handleAppleSignIn = async () => {
     try {
       setLoading('apple');
       await signInWithApple();
       console.log('Apple sign in successful');
-    } catch (error) {
+    } catch (error: any) {
       console.log('Apple sign in error:', error);
-      Alert.alert('Error', 'Failed to sign in with Apple');
+      if (error?.message !== 'Sign in was cancelled') {
+        Alert.alert('Error', 'Failed to sign in with Apple');
+      }
     } finally {
       setLoading(null);
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleContinueWithoutSignIn = async () => {
     try {
-      setLoading('google');
-      await signInWithGoogle();
-      console.log('Google sign in successful');
+      setLoading('guest');
+      await continueAsGuest();
+      console.log('Guest sign in successful');
     } catch (error) {
-      console.log('Google sign in error:', error);
-      Alert.alert('Error', 'Failed to sign in with Google');
+      console.log('Guest sign in error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     } finally {
       setLoading(null);
     }
   };
+
+  const showApple = Platform.OS === 'ios';
 
   return (
     <View style={styles.container}>
@@ -69,11 +73,11 @@ export default function LoginScreen() {
 
           <View style={styles.header}>
             <Text style={styles.title}>Welcome</Text>
-            <Text style={styles.subtitle}>Sign in and start your football journey</Text>
+            <Text style={styles.subtitle}>Sign in to save your progress across devices, or continue without an account</Text>
           </View>
 
           <View style={styles.socialButtons}>
-            {Platform.OS !== 'android' && (
+            {showApple && (
               <SocialButton
                 title="Continue with Apple"
                 onPress={handleAppleSignIn}
@@ -85,15 +89,34 @@ export default function LoginScreen() {
               />
             )}
 
-            <SocialButton
-              title="Continue with Google"
-              onPress={handleGoogleSignIn}
-              icon={<Chrome size={22} color={Colors.black} />}
-              variant="google"
-              loading={loading === 'google'}
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>{showApple ? 'or' : ''}</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.guestButton, loading !== null && styles.guestButtonDisabled]}
+              onPress={handleContinueWithoutSignIn}
               disabled={loading !== null}
-              testID="google-signin-button"
-            />
+              activeOpacity={0.8}
+              testID="guest-button"
+            >
+              {loading === 'guest' ? (
+                <View style={styles.guestLoadingContainer}>
+                  <Text style={styles.guestButtonText}>Setting up...</Text>
+                </View>
+              ) : (
+                <>
+                  <Text style={styles.guestButtonText}>Continue without sign in</Text>
+                  <ArrowRight size={20} color={Colors.text} />
+                </>
+              )}
+            </TouchableOpacity>
+            
+            <Text style={styles.guestNote}>
+              Your data will be saved locally on this device
+            </Text>
           </View>
 
           <View style={styles.termsContainer}>
@@ -136,16 +159,64 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: '800',
+    fontWeight: '800' as const,
     color: Colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: Colors.textSecondary,
+    lineHeight: 23,
   },
   socialButtons: {
     gap: 16,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 4,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    fontWeight: '500' as const,
+  },
+  guestButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    gap: 10,
+  },
+  guestButtonDisabled: {
+    opacity: 0.5,
+  },
+  guestLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  guestButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: Colors.text,
+  },
+  guestNote: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    marginTop: -4,
   },
   termsContainer: {
     marginTop: 32,

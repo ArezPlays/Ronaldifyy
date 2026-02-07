@@ -2,39 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { supabase } from '@/lib/supabase';
 
-let WebBrowser: any = null;
 let AppleAuthentication: any = null;
-let makeRedirectUri: any = null;
 let modulesLoaded = false;
 
 function loadModules() {
   if (modulesLoaded) return;
   modulesLoaded = true;
-
-  try {
-    WebBrowser = require('expo-web-browser');
-    console.log('[Auth] expo-web-browser loaded');
-  } catch (e: any) {
-    console.log('[Auth] expo-web-browser load error:', e?.message);
-  }
-
-  try {
-    if (WebBrowser?.maybeCompleteAuthSession) {
-      WebBrowser.maybeCompleteAuthSession();
-    }
-  } catch (e: any) {
-    console.log('[Auth] maybeCompleteAuthSession error:', e?.message);
-  }
-
-  try {
-    const authSession = require('expo-auth-session');
-    makeRedirectUri = authSession.makeRedirectUri;
-    console.log('[Auth] expo-auth-session loaded');
-  } catch (e: any) {
-    console.log('[Auth] expo-auth-session load error:', e?.message);
-  }
 
   try {
     AppleAuthentication = require('expo-apple-authentication');
@@ -55,7 +29,7 @@ export interface AuthUser {
   email: string;
   displayName: string | null;
   photoURL: string | null;
-  provider: 'apple' | 'google' | 'email';
+  provider: 'apple' | 'guest';
 }
 
 interface AuthState {
@@ -75,66 +49,21 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
   useEffect(() => {
     loadStoredUser();
-    listenToSupabaseAuth();
   }, []);
-
-  const listenToSupabaseAuth = () => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[Auth] Supabase auth event:', event);
-      if (event === 'SIGNED_IN' && session?.user) {
-        const supaUser = session.user;
-        console.log('[Auth] Supabase user signed in:', supaUser.email);
-        const provider = supaUser.app_metadata?.provider as string;
-        const user: AuthUser = {
-          uid: supaUser.id,
-          email: supaUser.email || 'unknown@gmail.com',
-          displayName: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'User',
-          photoURL: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture || null,
-          provider: (provider === 'apple' ? 'apple' : provider === 'google' ? 'google' : 'email') as AuthUser['provider'],
-        };
-        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-        setState({ user, isLoading: false, isAuthenticated: true });
-      } else if (event === 'SIGNED_OUT') {
-        await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-        setState({ user: null, isLoading: false, isAuthenticated: false });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  };
 
   const saveAndSetUser = async (user: AuthUser) => {
     await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-    console.log('[Auth] User saved to storage:', user.email);
+    console.log('[Auth] User saved to storage:', user.email, 'provider:', user.provider);
     setState({ user, isLoading: false, isAuthenticated: true });
   };
 
   const loadStoredUser = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const supaUser = session.user;
-        const provider = supaUser.app_metadata?.provider as string;
-        const user: AuthUser = {
-          uid: supaUser.id,
-          email: supaUser.email || 'unknown@gmail.com',
-          displayName: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'User',
-          photoURL: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture || null,
-          provider: (provider === 'apple' ? 'apple' : provider === 'google' ? 'google' : 'email') as AuthUser['provider'],
-        };
-        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-        setState({ user, isLoading: false, isAuthenticated: true });
-        console.log('[Auth] Restored Supabase session for:', user.email);
-        return;
-      }
-
       const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
       if (storedUser) {
         const user = JSON.parse(storedUser) as AuthUser;
         setState({ user, isLoading: false, isAuthenticated: true });
-        console.log('[Auth] Restored user from storage:', user.email);
+        console.log('[Auth] Restored user from storage:', user.email, 'provider:', user.provider);
       } else {
         setState(prev => ({ ...prev, isLoading: false }));
       }
@@ -144,218 +73,12 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   };
 
-  const signInWithGoogle = useCallback(async (): Promise<AuthUser> => {
-    console.log('[GoogleAuth] Starting Supabase Google OAuth...');
-    console.log('[GoogleAuth] Platform:', Platform.OS);
-
-    try {
-      let appRedirectUrl = 'rork-app://auth/callback';
-
-      if (makeRedirectUri) {
-        try {
-          appRedirectUrl = makeRedirectUri({ scheme: 'rork-app', path: 'auth/callback' });
-          console.log('[GoogleAuth] Generated app redirect URI:', appRedirectUrl);
-        } catch (e: any) {
-          console.log('[GoogleAuth] makeRedirectUri error, using default:', e?.message);
-        }
-      }
-
-      if (Platform.OS === 'web') {
-        appRedirectUrl = window.location.origin;
-        console.log('[GoogleAuth] Web redirect URI:', appRedirectUrl);
-      }
-
-      console.log('[GoogleAuth] Final app redirect URI:', appRedirectUrl);
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: appRedirectUrl,
-          skipBrowserRedirect: true,
-          queryParams: {
-            prompt: 'select_account',
-          },
-        },
-      });
-
-      if (error) {
-        console.log('[GoogleAuth] Supabase OAuth error:', error.message);
-        throw new Error(error.message);
-      }
-
-      if (!data?.url) {
-        console.log('[GoogleAuth] No OAuth URL returned');
-        throw new Error('Failed to get Google sign-in URL');
-      }
-
-      console.log('[GoogleAuth] OAuth URL generated, opening browser...');
-      console.log('[GoogleAuth] OAuth URL (first 200 chars):', data.url.substring(0, 200));
-
-      if (!WebBrowser?.openAuthSessionAsync) {
-        console.log('[GoogleAuth] WebBrowser not available');
-        throw new Error('Browser not available for authentication');
-      }
-
-      const result = await WebBrowser.openAuthSessionAsync(data.url, appRedirectUrl);
-      console.log('[GoogleAuth] Browser result type:', result?.type);
-      if (result?.url) {
-        console.log('[GoogleAuth] Result URL (first 150 chars):', result.url.substring(0, 150));
-      }
-
-      if (result?.type === 'cancel' || result?.type === 'dismiss') {
-        throw new Error('Sign in was cancelled');
-      }
-
-      if (result?.type === 'success' && result?.url) {
-        console.log('[GoogleAuth] Got callback URL, extracting tokens...');
-
-        const url = result.url;
-        let accessToken: string | null = null;
-        let refreshToken: string | null = null;
-
-        const hashIndex = url.indexOf('#');
-        if (hashIndex !== -1) {
-          const fragment = url.substring(hashIndex + 1);
-          const params = new URLSearchParams(fragment);
-          accessToken = params.get('access_token');
-          refreshToken = params.get('refresh_token');
-          console.log('[GoogleAuth] Found tokens in hash fragment:', { hasAccess: !!accessToken, hasRefresh: !!refreshToken });
-        }
-
-        if (!accessToken) {
-          const queryString = url.split('?')[1]?.split('#')[0] || '';
-          const queryParams = new URLSearchParams(queryString);
-          accessToken = queryParams.get('access_token');
-          refreshToken = queryParams.get('refresh_token');
-          console.log('[GoogleAuth] Found tokens in query params:', { hasAccess: !!accessToken, hasRefresh: !!refreshToken });
-        }
-
-        if (!accessToken && url.includes('code=')) {
-          const queryString = url.split('?')[1]?.split('#')[0] || '';
-          const queryParams = new URLSearchParams(queryString);
-          const code = queryParams.get('code');
-          if (code) {
-            console.log('[GoogleAuth] Got authorization code, exchanging for session...');
-            const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-            if (exchangeError) {
-              console.log('[GoogleAuth] Code exchange error:', exchangeError.message);
-              throw new Error(exchangeError.message);
-            }
-            if (sessionData?.user) {
-              const supaUser = sessionData.user;
-              const user: AuthUser = {
-                uid: supaUser.id,
-                email: supaUser.email || 'unknown@gmail.com',
-                displayName: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'Google User',
-                photoURL: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture || null,
-                provider: 'google',
-              };
-              await saveAndSetUser(user);
-              console.log('[GoogleAuth] Success via code exchange:', user.email);
-              return user;
-            }
-          }
-        }
-
-        if (accessToken && refreshToken) {
-          console.log('[GoogleAuth] Setting Supabase session with tokens...');
-          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-
-          if (sessionError) {
-            console.log('[GoogleAuth] Set session error:', sessionError.message);
-            throw new Error(sessionError.message);
-          }
-
-          if (sessionData?.user) {
-            const supaUser = sessionData.user;
-            const user: AuthUser = {
-              uid: supaUser.id,
-              email: supaUser.email || 'unknown@gmail.com',
-              displayName: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'Google User',
-              photoURL: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture || null,
-              provider: 'google',
-            };
-            await saveAndSetUser(user);
-            console.log('[GoogleAuth] Success via token session:', user.email);
-            return user;
-          }
-        }
-
-        if (accessToken && !refreshToken) {
-          console.log('[GoogleAuth] Only access_token available, getting user...');
-          const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
-          if (!userError && userData?.user) {
-            const supaUser = userData.user;
-            const user: AuthUser = {
-              uid: supaUser.id,
-              email: supaUser.email || 'unknown@gmail.com',
-              displayName: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'Google User',
-              photoURL: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture || null,
-              provider: 'google',
-            };
-            await saveAndSetUser(user);
-            console.log('[GoogleAuth] Success via access token only:', user.email);
-            return user;
-          }
-        }
-
-        console.log('[GoogleAuth] Could not extract tokens from URL');
-        console.log('[GoogleAuth] Full URL for debugging:', url);
-      }
-
-      console.log('[GoogleAuth] Polling for session (fallback)...');
-      return new Promise<AuthUser>((resolve, reject) => {
-        let attempts = 0;
-        const checkInterval = setInterval(async () => {
-          attempts++;
-          try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-              clearInterval(checkInterval);
-              const supaUser = session.user;
-              const user: AuthUser = {
-                uid: supaUser.id,
-                email: supaUser.email || 'unknown@gmail.com',
-                displayName: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'Google User',
-                photoURL: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture || null,
-                provider: 'google',
-              };
-              await saveAndSetUser(user);
-              console.log('[GoogleAuth] Success via session polling:', user.email);
-              resolve(user);
-            }
-          } catch (e) {
-            console.log('[GoogleAuth] Session poll error:', e);
-          }
-          if (attempts > 30) {
-            clearInterval(checkInterval);
-            reject(new Error('Google sign-in timed out waiting for session'));
-          }
-        }, 500);
-      });
-    } catch (error: any) {
-      console.log('[GoogleAuth] Error:', error?.message || error);
-      throw error;
-    }
-  }, []);
-
   const signInWithApple = useCallback(async (): Promise<AuthUser> => {
     console.log('[AppleAuth] Starting Apple Sign In...');
 
     if (Platform.OS === 'web' || !AppleAuthentication) {
-      console.log('[AppleAuth] Apple Sign In not available, using fallback');
-      const fallbackUser: AuthUser = {
-        uid: `apple_web_${Date.now()}`,
-        email: 'user@icloud.com',
-        displayName: 'Apple User',
-        photoURL: null,
-        provider: 'apple',
-      };
-      await saveAndSetUser(fallbackUser);
-      return fallbackUser;
+      console.log('[AppleAuth] Apple Sign In not available on this platform');
+      throw new Error('Apple Sign In is not available on this platform');
     }
 
     try {
@@ -378,37 +101,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         email: credential.email,
         fullName: credential.fullName,
       });
-
-      if (credential.identityToken) {
-        console.log('[AppleAuth] Signing in with Supabase using Apple identity token...');
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'apple',
-          token: credential.identityToken,
-        });
-
-        if (!error && data?.user) {
-          const supaUser = data.user;
-          const displayName = credential.fullName
-            ? [credential.fullName.givenName, credential.fullName.familyName]
-                .filter(Boolean)
-                .join(' ') || null
-            : null;
-
-          const user: AuthUser = {
-            uid: supaUser.id,
-            email: supaUser.email || credential.email || 'private@apple.com',
-            displayName: displayName || supaUser.user_metadata?.full_name || supaUser.email?.split('@')[0] || 'Apple User',
-            photoURL: null,
-            provider: 'apple',
-          };
-          await saveAndSetUser(user);
-          return user;
-        }
-
-        if (error) {
-          console.log('[AppleAuth] Supabase Apple sign-in error:', error.message);
-        }
-      }
 
       const displayName = credential.fullName
         ? [credential.fullName.givenName, credential.fullName.familyName]
@@ -433,6 +125,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         provider: 'apple',
       };
       await saveAndSetUser(user);
+      console.log('[AppleAuth] Success:', user.email);
       return user;
     } catch (error: any) {
       console.log('[AppleAuth] Error:', error);
@@ -443,87 +136,35 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
-  const signInWithEmail = useCallback(async (email: string, password: string): Promise<AuthUser> => {
-    console.log('[EmailAuth] Signing in with email:', email);
-    if (!email || !password) {
-      throw new Error('Email and password are required');
-    }
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      console.log('[EmailAuth] Supabase error:', error.message);
-      throw new Error(error.message);
-    }
-
-    if (data?.user) {
-      const supaUser = data.user;
-      const user: AuthUser = {
-        uid: supaUser.id,
-        email: supaUser.email || email,
-        displayName: supaUser.user_metadata?.full_name || email.split('@')[0],
-        photoURL: supaUser.user_metadata?.avatar_url || null,
-        provider: 'email',
-      };
-      await saveAndSetUser(user);
-      return user;
-    }
-
-    throw new Error('Sign in failed');
-  }, []);
-
-  const signUpWithEmail = useCallback(async (email: string, password: string, name: string): Promise<AuthUser> => {
-    console.log('[EmailAuth] Signing up with email:', email);
-    if (!email || !password || !name) {
-      throw new Error('Email, password, and name are required');
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name },
-      },
-    });
-
-    if (error) {
-      console.log('[EmailAuth] Supabase sign-up error:', error.message);
-      throw new Error(error.message);
-    }
-
-    if (data?.user) {
-      const supaUser = data.user;
-      const user: AuthUser = {
-        uid: supaUser.id,
-        email: supaUser.email || email,
-        displayName: name,
-        photoURL: null,
-        provider: 'email',
-      };
-      await saveAndSetUser(user);
-      return user;
-    }
-
-    throw new Error('Sign up failed');
+  const continueAsGuest = useCallback(async (): Promise<AuthUser> => {
+    console.log('[GuestAuth] Continuing as guest...');
+    const guestId = `guest_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    
+    const user: AuthUser = {
+      uid: guestId,
+      email: '',
+      displayName: 'Player',
+      photoURL: null,
+      provider: 'guest',
+    };
+    await saveAndSetUser(user);
+    console.log('[GuestAuth] Guest user created:', guestId);
+    return user;
   }, []);
 
   const signOut = useCallback(async () => {
     console.log('[Auth] Signing out...');
-    try {
-      await supabase.auth.signOut();
-    } catch (e: any) {
-      console.log('[Auth] Supabase sign out error:', e?.message);
-    }
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
     setState({ user: null, isLoading: false, isAuthenticated: false });
   }, []);
 
+  const isGuest = state.user?.provider === 'guest';
+
   return {
     ...state,
+    isGuest,
     signInWithApple,
-    signInWithGoogle,
-    signInWithEmail,
-    signUpWithEmail,
+    continueAsGuest,
     signOut,
   };
 });

@@ -8,7 +8,7 @@ interface SocialButtonProps {
   icon: React.ReactNode;
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'apple' | 'google' | 'default';
+  variant?: 'apple' | 'default';
   testID?: string;
 }
 
@@ -27,8 +27,6 @@ export default function SocialButton({
     switch (variant) {
       case 'apple':
         return Colors.white;
-      case 'google':
-        return Colors.white;
       default:
         return Colors.surface;
     }
@@ -37,7 +35,6 @@ export default function SocialButton({
   const getTextColor = () => {
     switch (variant) {
       case 'apple':
-      case 'google':
         return Colors.black;
       default:
         return Colors.text;

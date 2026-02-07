@@ -27,6 +27,7 @@ const AUTH_STORAGE_KEY = '@ronaldify_auth_user';
 
 const GOOGLE_CLIENT_ID_IOS = '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com';
 const GOOGLE_CLIENT_ID_ANDROID = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID_WEB = '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com';
 
 const buildReversedClientRedirect = (clientId: string) => {
   const parts = clientId.split('.apps.googleusercontent.com')[0];
@@ -161,10 +162,13 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         clientId = GOOGLE_CLIENT_ID_IOS;
         redirectUri = buildReversedClientRedirect(GOOGLE_CLIENT_ID_IOS);
       } else if (Platform.OS === 'android') {
-        clientId = GOOGLE_CLIENT_ID_ANDROID;
-        redirectUri = buildReversedClientRedirect(GOOGLE_CLIENT_ID_ANDROID);
+        clientId = GOOGLE_CLIENT_ID_WEB;
+        redirectUri = AuthSession.makeRedirectUri({
+          scheme: 'rork-app',
+          path: 'redirect',
+        });
       } else {
-        clientId = GOOGLE_CLIENT_ID_ANDROID;
+        clientId = GOOGLE_CLIENT_ID_WEB;
         redirectUri = AuthSession.makeRedirectUri();
       }
 

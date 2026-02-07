@@ -57,11 +57,17 @@ const getWeekStartDate = (): string => {
 
 const XP_PER_LEVEL = 500;
 
+export interface LevelUpInfo {
+  previousLevel: number;
+  newLevel: number;
+}
+
 export const [TrainingProvider, useTraining] = createContextHook(() => {
   const { profile } = useUser();
   const [progress, setProgress] = useState<TrainingProgress>(DEFAULT_PROGRESS);
   const [isLoading, setIsLoading] = useState(true);
   const [dailyWorkout, setDailyWorkout] = useState<DailyWorkout | null>(null);
+  const [levelUpInfo, setLevelUpInfo] = useState<LevelUpInfo | null>(null);
 
   useEffect(() => {
     loadProgress();
@@ -230,6 +236,11 @@ export const [TrainingProvider, useTraining] = createContextHook(() => {
     setProgress(newProgress);
     await saveProgress(newProgress);
     
+    if (newLevel > progress.level) {
+      console.log('LEVEL UP! From', progress.level, 'to', newLevel);
+      setLevelUpInfo({ previousLevel: progress.level, newLevel });
+    }
+    
     console.log('Drill completed:', drillId, 'XP earned:', drill.xpReward);
     
     return { xpEarned: drill.xpReward, newLevel: newLevel > progress.level };
@@ -255,6 +266,11 @@ export const [TrainingProvider, useTraining] = createContextHook(() => {
 
     setProgress(newProgress);
     await saveProgress(newProgress);
+    
+    if (newLevel > progress.level) {
+      console.log('LEVEL UP! From', progress.level, 'to', newLevel);
+      setLevelUpInfo({ previousLevel: progress.level, newLevel });
+    }
     
     return { xpEarned: xpReward, newLevel: newLevel > progress.level };
   }, [progress]);
@@ -368,5 +384,7 @@ export const [TrainingProvider, useTraining] = createContextHook(() => {
     isSkillLevelUnlocked,
     isLevelProLocked,
     getAllSkillsProgress,
+    levelUpInfo,
+    dismissLevelUp: () => setLevelUpInfo(null),
   };
 });

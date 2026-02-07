@@ -15,6 +15,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TrainingProvider } from "@/contexts/TrainingContext";
+import LevelUpCelebration from "@/components/LevelUpCelebration";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -240,6 +241,7 @@ function AppProviders({ children }: { children: React.ReactNode }) {
                     <NavigationController>
                       {children}
                     </NavigationController>
+                    <LevelUpCelebration />
                   </TrainingProvider>
                 </UserProvider>
               </AuthProvider>

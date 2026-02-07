@@ -5,6 +5,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -33,10 +34,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     isAuthenticated: false,
   });
 
+  const redirectUri = makeRedirectUri({
+    native: 'app.rork.ronaldify_5ml8ava://oauth2redirect',
+  });
+
+  console.log('[GoogleAuth] Redirect URI:', redirectUri);
+
   const [_request, response, promptAsync] = Google.useAuthRequest({
     iosClientId: '199378159937-1m8jsjuoaqinilha19nnlik3rpbba7q9.apps.googleusercontent.com',
     androidClientId: '199378159937-rspmgvphvs92sbmdfnhbp9m6719pmbkj.apps.googleusercontent.com',
     webClientId: process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID,
+    redirectUri,
   });
 
   useEffect(() => {

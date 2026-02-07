@@ -32,7 +32,20 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.ronaldify_5ml8ava"
+      "package": "app.rork.ronaldify_5ml8ava",
+      "versionCode": 8,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "app.rork.ronaldify_5ml8ava",
+              "host": "oauth2redirect"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -50,6 +63,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "873d52a1-2478-4d35-a369-9042bccb0d2d"
+      }
     }
   }
 }

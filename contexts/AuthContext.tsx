@@ -3,8 +3,8 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
 WebBrowser.maybeCompleteAuthSession();
 
 export interface AuthUser {
@@ -143,144 +143,77 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
+  const [, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+    webClientId: GOOGLE_CLIENT_ID_WEB,
+    iosClientId: GOOGLE_CLIENT_ID_IOS,
+    androidClientId: GOOGLE_CLIENT_ID_ANDROID,
+    scopes: ['openid', 'profile', 'email'],
+  });
+
+  const processGoogleResponse = useCallback(async (authentication: { accessToken: string }): Promise<AuthUser> => {
+    console.log('[GoogleAuth] Fetching user info with access token...');
+    const userInfoResponse = await fetch(
+      'https://www.googleapis.com/oauth2/v2/userinfo',
+      { headers: { Authorization: `Bearer ${authentication.accessToken}` } }
+    );
+
+    if (!userInfoResponse.ok) {
+      const errorText = await userInfoResponse.text();
+      console.log('[GoogleAuth] User info fetch failed:', errorText);
+      throw new Error('Failed to fetch Google user info');
+    }
+
+    const userInfo = await userInfoResponse.json();
+    console.log('[GoogleAuth] User info received:', JSON.stringify({ id: userInfo.id, email: userInfo.email, name: userInfo.name }));
+
+    const user: AuthUser = {
+      uid: `google_${userInfo.id}`,
+      email: userInfo.email || 'unknown@gmail.com',
+      displayName: userInfo.name || userInfo.email?.split('@')[0] || 'Google User',
+      photoURL: userInfo.picture || null,
+      provider: 'google',
+    };
+
+    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    console.log('[GoogleAuth] User saved successfully');
+
+    setState({
+      user,
+      isLoading: false,
+      isAuthenticated: true,
+    });
+
+    return user;
+  }, []);
+
+  const googleResolveRef = useCallback(() => ({ current: null as ((user: AuthUser) => void) | null }), [])();
+  const googleRejectRef = useCallback(() => ({ current: null as ((error: Error) => void) | null }), [])();
+
+  useEffect(() => {
+    if (googleResponse?.type === 'success' && googleResponse.authentication?.accessToken) {
+      console.log('[GoogleAuth] Got successful response, processing...');
+      processGoogleResponse(googleResponse.authentication)
+        .then((user) => googleResolveRef.current?.(user))
+        .catch((err) => googleRejectRef.current?.(err));
+    } else if (googleResponse?.type === 'cancel' || googleResponse?.type === 'dismiss') {
+      console.log('[GoogleAuth] User cancelled');
+      googleRejectRef.current?.(new Error('Sign in was cancelled'));
+    } else if (googleResponse?.type === 'error') {
+      console.log('[GoogleAuth] Error response:', googleResponse.error);
+      googleRejectRef.current?.(new Error(googleResponse.error?.message || 'Google sign in failed'));
+    }
+  }, [googleResponse, processGoogleResponse, googleResolveRef, googleRejectRef]);
+
   const signInWithGoogle = useCallback(async (): Promise<AuthUser> => {
     console.log('[GoogleAuth] Starting Google Sign In...');
-    console.log('[GoogleAuth] Platform:', Platform.OS, '__DEV__:', __DEV__);
+    console.log('[GoogleAuth] Platform:', Platform.OS);
 
-    try {
-      const isExpoGo = !!(__DEV__);
-      const isAndroid = Platform.OS === 'android';
-      const isIOS = Platform.OS === 'ios';
-      const isAndroidStandalone = isAndroid && !isExpoGo;
-
-      let redirectUri: string;
-      let clientId: string;
-
-      if (isAndroidStandalone) {
-        clientId = GOOGLE_CLIENT_ID_ANDROID;
-        redirectUri = AuthSession.makeRedirectUri({
-          native: 'app.rork.ronaldify_5ml8ava:/oauth2redirect',
-        });
-      } else if (isAndroid && isExpoGo) {
-        clientId = GOOGLE_CLIENT_ID_WEB;
-        redirectUri = AuthSession.makeRedirectUri({
-          scheme: 'rork-app',
-          path: 'redirect',
-        });
-      } else if (isIOS) {
-        clientId = GOOGLE_CLIENT_ID_IOS;
-        redirectUri = AuthSession.makeRedirectUri({
-          scheme: 'rork-app',
-          path: 'redirect',
-        });
-      } else {
-        clientId = GOOGLE_CLIENT_ID_WEB;
-        redirectUri = AuthSession.makeRedirectUri({
-          scheme: 'rork-app',
-          path: 'redirect',
-        });
-      }
-
-      console.log('[GoogleAuth] Client ID:', clientId);
-      console.log('[GoogleAuth] Redirect URI:', redirectUri);
-      console.log('[GoogleAuth] isAndroidStandalone:', isAndroidStandalone);
-
-      const discovery: AuthSession.DiscoveryDocument = {
-        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-        tokenEndpoint: 'https://oauth2.googleapis.com/token',
-        revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
-      };
-
-      const useCodeFlow = isAndroidStandalone;
-      console.log('[GoogleAuth] Using code flow:', useCodeFlow);
-
-      const authRequest = new AuthSession.AuthRequest({
-        clientId,
-        redirectUri,
-        scopes: ['openid', 'profile', 'email'],
-        responseType: useCodeFlow ? AuthSession.ResponseType.Code : AuthSession.ResponseType.Token,
-        usePKCE: useCodeFlow,
-        ...(useCodeFlow ? { prompt: AuthSession.Prompt.SelectAccount } : {}),
-      });
-
-      console.log('[GoogleAuth] Prompting user...');
-      const result = await authRequest.promptAsync(discovery);
-      console.log('[GoogleAuth] Result type:', result.type);
-      console.log('[GoogleAuth] Result params:', JSON.stringify(result.type === 'success' ? result.params : {}));
-
-      if (result.type === 'success') {
-        let accessToken = result.params?.access_token;
-
-        if (!accessToken && result.params?.code) {
-          console.log('[GoogleAuth] Exchanging auth code for tokens...');
-          console.log('[GoogleAuth] Code verifier present:', !!authRequest.codeVerifier);
-          
-          const tokenResponse = await AuthSession.exchangeCodeAsync(
-            {
-              clientId,
-              code: result.params.code,
-              redirectUri,
-              extraParams: {
-                code_verifier: authRequest.codeVerifier || '',
-              },
-            },
-            discovery
-          );
-          console.log('[GoogleAuth] Token exchange successful, got access token:', !!tokenResponse.accessToken);
-          accessToken = tokenResponse.accessToken;
-        }
-
-        if (!accessToken) {
-          console.log('[GoogleAuth] No access token obtained');
-          throw new Error('Failed to obtain access token from Google');
-        }
-
-        console.log('[GoogleAuth] Fetching user info...');
-        const userInfoResponse = await fetch(
-          'https://www.googleapis.com/oauth2/v2/userinfo',
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
-
-        if (!userInfoResponse.ok) {
-          const errorText = await userInfoResponse.text();
-          console.log('[GoogleAuth] User info fetch failed:', errorText);
-          throw new Error('Failed to fetch Google user info');
-        }
-
-        const userInfo = await userInfoResponse.json();
-        console.log('[GoogleAuth] User info received:', JSON.stringify({ id: userInfo.id, email: userInfo.email, name: userInfo.name }));
-
-        const user: AuthUser = {
-          uid: `google_${userInfo.id}`,
-          email: userInfo.email || 'unknown@gmail.com',
-          displayName: userInfo.name || userInfo.email?.split('@')[0] || 'Google User',
-          photoURL: userInfo.picture || null,
-          provider: 'google',
-        };
-
-        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-        console.log('[GoogleAuth] User saved successfully');
-
-        setState({
-          user,
-          isLoading: false,
-          isAuthenticated: true,
-        });
-
-        return user;
-      } else if (result.type === 'cancel' || result.type === 'dismiss') {
-        throw new Error('Sign in was cancelled');
-      } else {
-        console.log('[GoogleAuth] Unexpected result type:', result.type);
-        throw new Error('Google sign in failed');
-      }
-    } catch (error: any) {
-      console.log('[GoogleAuth] Error:', error?.message || error);
-      throw error;
-    }
-  }, []);
+    return new Promise<AuthUser>((resolve, reject) => {
+      googleResolveRef.current = resolve;
+      googleRejectRef.current = reject;
+      googlePromptAsync().catch(reject);
+    });
+  }, [googlePromptAsync, googleResolveRef, googleRejectRef]);
 
   const signInWithEmail = useCallback(async (email: string, password: string): Promise<AuthUser> => {
     console.log('Signing in with email:', email);

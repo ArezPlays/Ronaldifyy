@@ -74,7 +74,7 @@ export default function LoginScreen() {
 
           <View style={styles.header}>
             <Text style={styles.title}>Welcome</Text>
-            <Text style={styles.subtitle}>Sign in to save your progress across devices, or continue without an account</Text>
+            <Text style={styles.subtitle}>Sign in to save your progress across devices, or continue without an account.</Text>
           </View>
 
           <View style={styles.socialButtons}>

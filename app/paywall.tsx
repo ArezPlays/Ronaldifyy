@@ -42,7 +42,7 @@ function getPackageLabelKey(packageType: string): 'weekly' | 'monthly' | 'yearly
 }
 
 function getPackageBadgeText(packageType: string, trialInfo: TrialInfo | null): string | null {
-  if (trialInfo) {
+  if (trialInfo && Platform.OS !== 'android') {
     const days = trialInfo.unit === 'DAY' ? trialInfo.duration : trialInfo.duration * (trialInfo.unit === 'WEEK' ? 7 : 30);
     return `${days}-DAY FREE TRIAL`;
   }
@@ -234,7 +234,7 @@ export default function PaywallScreen() {
                       <View style={dynamicStyles.packageInfo}>
                         <Text style={dynamicStyles.packageLabel}>{label}</Text>
                         <Text style={dynamicStyles.packageDescription}>
-                          {pkg.trialInfo
+                          {pkg.trialInfo && Platform.OS !== 'android'
                             ? `Free for ${pkg.trialInfo.unit === 'DAY' ? pkg.trialInfo.duration : pkg.trialInfo.duration * 7} days, then ${pkg.product.priceString}/${label === t.weekly ? 'week' : label === t.yearly ? 'year' : 'month'}`
                             : `${pkg.product.priceString}/${label === t.weekly ? 'week' : label === t.yearly ? 'year' : 'month'}`
                           }
@@ -256,7 +256,7 @@ export default function PaywallScreen() {
             </View>
           )}
 
-          {selectedPackage?.trialInfo && (
+          {selectedPackage?.trialInfo && Platform.OS !== 'android' && (
             <View style={dynamicStyles.trialBanner}>
               <Gift size={18} color={colors.primary} />
               <Text style={dynamicStyles.trialBannerText}>
@@ -281,7 +281,7 @@ export default function PaywallScreen() {
                 <ActivityIndicator size="small" color={colors.black} />
               ) : (
                 <Text style={dynamicStyles.ctaText}>
-                  {selectedPackage?.trialInfo
+                  {selectedPackage?.trialInfo && Platform.OS !== 'android'
                     ? `Start Free Trial`
                     : `${t.continueWith} ${selectedPackage ? getPackageLabel(selectedPackage.packageType) : ''}`
                   }

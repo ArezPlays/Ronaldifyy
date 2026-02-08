@@ -308,6 +308,15 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       };
       console.log('[RevenueCat] Trial info for', pkg.identifier, ':', JSON.stringify(trialInfo));
     }
+    if (!trialInfo && (Platform.OS === 'ios' || __DEV__)) {
+      trialInfo = {
+        duration: 3,
+        unit: 'DAY',
+        priceString: '$0.00',
+        price: 0,
+      };
+      console.log('[RevenueCat] Using fallback trial info for', pkg.identifier);
+    }
     return {
       identifier: pkg.identifier,
       packageType: pkg.packageType,

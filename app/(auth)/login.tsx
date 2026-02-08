@@ -102,7 +102,7 @@ export default function LoginScreen() {
               style={[styles.guestButton, loading !== null && styles.guestButtonDisabled]}
               onPress={handleContinueWithoutSignIn}
               disabled={loading !== null}
-              activeOpacity={0.8}
+              activeOpacity={0.7}
               testID="guest-button"
             >
               {loading === 'guest' ? (
@@ -197,9 +197,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.surface,
     gap: 10,
   },
   guestButtonDisabled: {

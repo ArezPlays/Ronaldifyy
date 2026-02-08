@@ -50,6 +50,13 @@ core
 
 # dependencies
 node_modules/
+/android/local.properties
+/android/build/
+/android/app/build/
+*.keystore
+*.iml
+.gradle/
+.idea/
 
 # Expo
 .expo/

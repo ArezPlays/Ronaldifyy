@@ -115,8 +115,15 @@ export const [TrainingProvider, useTraining] = createContextHook(() => {
   const loadProgress = async () => {
     try {
       const stored = await AsyncStorage.getItem(TRAINING_STORAGE_KEY);
-      if (stored) {
+      if (stored && stored !== 'undefined' && stored !== 'null') {
         const parsed = JSON.parse(stored);
+        if (!parsed || typeof parsed !== 'object') {
+          console.log('[Training] Invalid stored data, using defaults');
+          const initialProgress = { ...DEFAULT_PROGRESS, weekStartDate: getWeekStartDate() };
+          setProgress(initialProgress);
+          setIsLoading(false);
+          return;
+        }
         
         const today = new Date().toISOString().split('T')[0];
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];

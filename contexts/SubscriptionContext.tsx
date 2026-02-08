@@ -11,6 +11,7 @@ try {
   console.log('[RevenueCat] Module loaded successfully');
 } catch (error: any) {
   console.log('[RevenueCat] Module not available:', error?.message || error);
+  Purchases = null;
 }
 
 function getRCApiKey() {
@@ -35,8 +36,15 @@ function getRCApiKey() {
 }
 
 let isConfigured = false;
+let configureAttempted = false;
 
-function tryConfigureRC() {
+function tryConfigureRC(): boolean {
+  if (configureAttempted && isConfigured) {
+    console.log('[RevenueCat] Already configured, skipping');
+    return true;
+  }
+  configureAttempted = true;
+  
   if (!Purchases) {
     console.log('[RevenueCat] Purchases module not available, skipping configure');
     return false;

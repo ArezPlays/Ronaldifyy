@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter, useSegments, useRootNavigationState } from "expo-router";
 import { trpc, trpcClient } from "@/lib/trpc";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, Component } from "react";
+import React, { useEffect, useRef, useState, Component } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
@@ -39,9 +39,28 @@ function AuthSubscriptionSync() {
 function NavigationController({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
+  const navigationState = useRootNavigationState();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { onboardingCompleted, hasSeenWelcome, isLoading: userLoading, completeOnboarding, updateProfile, profile } = useUser();
   const { isCompleted: personalizationCompleted, isLoading: personalizationLoading, loadPersonalization, data: personalizationData } = usePersonalization();
+  const isMounted = useRef(true);
+  const [navigationReady, setNavigationReady] = useState(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (navigationState?.key) {
+      const timer = setTimeout(() => {
+        if (isMounted.current) {
+          setNavigationReady(true);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [navigationState?.key]);
 
   useEffect(() => {
     loadPersonalization();
@@ -75,6 +94,7 @@ function NavigationController({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, personalizationCompleted, onboardingCompleted, personalizationData, completeOnboarding, updateProfile, profile]);
 
   useEffect(() => {
+    if (!navigationReady) return;
     if (authLoading || userLoading || personalizationLoading || personalizationCompleted === null) return;
 
     const inPersonalizationGroup = segments[0] === "(personalization)";
@@ -96,7 +116,6 @@ function NavigationController({ children }: { children: React.ReactNode }) {
     ];
     const isOnAllowedScreen = allowedRootScreens.includes(currentScreen);
 
-    // Don't redirect if user is on an allowed root screen
     if (isOnAllowedScreen) {
       console.log("On allowed screen, skipping navigation checks:", currentScreen);
       return;
@@ -116,32 +135,43 @@ function NavigationController({ children }: { children: React.ReactNode }) {
       isOnAllowedScreen,
     });
 
+    const safeNavigate = (path: string) => {
+      try {
+        if (isMounted.current) {
+          console.log("Safe navigating to:", path);
+          router.replace(path as any);
+        }
+      } catch (e) {
+        console.log("[NavigationController] Navigation error (will retry):", e);
+      }
+    };
+
     if (!personalizationCompleted) {
       if (!inPersonalizationGroup) {
         console.log("Redirecting to personalization start");
-        router.replace("/(personalization)/start");
+        safeNavigate("/(personalization)/start");
       }
     } else if (!isAuthenticated) {
       if (!inAuthGroup) {
         console.log("Redirecting to login");
-        router.replace("/(auth)/login");
+        safeNavigate("/(auth)/login");
       }
     } else if (!onboardingCompleted && !hasFullPersonalization) {
       if (!inOnboardingGroup) {
         console.log("Redirecting to onboarding");
-        router.replace("/(onboarding)/position");
+        safeNavigate("/(onboarding)/position");
       }
     } else if (!hasSeenWelcome && tabScreen !== "welcome-coach") {
       console.log("Redirecting to welcome coach");
-      router.replace("/(tabs)/welcome-coach");
+      safeNavigate("/(tabs)/welcome-coach");
     } else if (hasSeenWelcome && tabScreen === "welcome-coach") {
       console.log("Redirecting to home");
-      router.replace("/(tabs)");
+      safeNavigate("/(tabs)");
     } else if (!inTabsGroup && !isOnAllowedScreen) {
       console.log("Redirecting to tabs");
-      router.replace("/(tabs)");
+      safeNavigate("/(tabs)");
     }
-  }, [isAuthenticated, onboardingCompleted, hasSeenWelcome, personalizationCompleted, personalizationData, authLoading, userLoading, personalizationLoading, segments, router]);
+  }, [navigationReady, isAuthenticated, onboardingCompleted, hasSeenWelcome, personalizationCompleted, personalizationData, authLoading, userLoading, personalizationLoading, segments, router]);
 
   return <>{children}</>;
 }
@@ -326,12 +356,23 @@ const errorStyles = StyleSheet.create({
 });
 
 export default function RootLayout() {
+  const [appReady, setAppReady] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 500);
+      setAppReady(true);
+      SplashScreen.hideAsync().catch((e) => {
+        console.log('[SplashScreen] hideAsync error (safe to ignore):', e);
+      });
+    }, 600);
     return () => clearTimeout(timer);
   }, []);
+
+  if (!appReady) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0F0F1A' }} />
+    );
+  }
 
   return (
     <AppErrorBoundary>

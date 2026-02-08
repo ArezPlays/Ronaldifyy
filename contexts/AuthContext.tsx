@@ -91,8 +91,14 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
       if (storedUser) {
         const user = JSON.parse(storedUser) as AuthUser;
-        setState({ user, isLoading: false, isAuthenticated: true });
-        console.log('[Auth] Restored user from storage:', user.email, 'provider:', user.provider);
+        if (user && user.uid) {
+          setState({ user, isLoading: false, isAuthenticated: true });
+          console.log('[Auth] Restored user from storage:', user.email, 'provider:', user.provider);
+        } else {
+          console.log('[Auth] Stored user data is invalid, clearing');
+          await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+          setState(prev => ({ ...prev, isLoading: false }));
+        }
       } else {
         setState(prev => ({ ...prev, isLoading: false }));
       }

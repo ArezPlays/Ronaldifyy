@@ -6,7 +6,9 @@
     "start": "bunx rork start -p v7kyvdncg0nye94ekl366 --tunnel",
     "start-web": "bunx rork start -p v7kyvdncg0nye94ekl366 --web --tunnel",
     "start-web-dev": "DEBUG=expo* bunx rork start -p v7kyvdncg0nye94ekl366 --web --tunnel",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@babel/highlight": "^7.25.9",

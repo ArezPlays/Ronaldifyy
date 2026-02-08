@@ -835,7 +835,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   inputContainer: {
     padding: 16,
-    paddingBottom: 8,
+    paddingBottom: 90,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.background,
@@ -877,7 +877,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   limitContainer: {
     padding: 16,
-    paddingBottom: 8,
+    paddingBottom: 90,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.background,

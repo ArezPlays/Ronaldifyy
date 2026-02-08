@@ -198,6 +198,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 16,
     backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     gap: 10,
   },
   guestButtonDisabled: {

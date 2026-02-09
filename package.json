@@ -18,7 +18,7 @@
     "@hono/trpc-server": "^0.4.2",
     "@nkzw/create-context-hook": "^1.1.0",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@rork-ai/toolkit-sdk": "^0.2.51",
+    "@rork-ai/toolkit-sdk": "^0.2.54",
     "@stardazed/streams-text-encoding": "^1.0.2",
     "@supabase/supabase-js": "^2.95.3",
     "@tanstack/react-query": "^5.83.0",
@@ -70,8 +70,10 @@
     "@babel/core": "^7.29.0",
     "@expo/ngrok": "^4.1.0",
     "@types/react": "~19.1.10",
+    "eas-cli": "^16.32.0",
     "eslint": "^9.31.0",
     "eslint-config-expo": "~10.0.0",
+    "rork": "^1.0.1",
     "typescript": "~5.9.2"
   },
   "private": true

@@ -1,19 +1,31 @@
 {
   "cli": {
-    "version": ">= 16.32.0"
+    "version": ">=16.32.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "NODE_ENV": "development"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "NODE_ENV": "production"
+      }
     },
     "production": {
       "autoIncrement": false,
+      "env": {
+        "NODE_ENV": "production"
+      },
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "resourceClass": "medium"
       }
     }
   },

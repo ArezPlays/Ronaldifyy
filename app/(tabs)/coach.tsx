@@ -524,7 +524,7 @@ If they ask about drills, tell them to check the Drills tab.`;
                   <View style={styles.limitTextBlock}>
                     <Text style={styles.limitTitle}>Free messages used up</Text>
                     <Text style={styles.limitSubtitle}>
-                      You've used all {FREE_MESSAGE_LIMIT} free messages. Upgrade to Pro for unlimited coaching.
+                      You&apos;ve used all {FREE_MESSAGE_LIMIT} free messages. Upgrade to Pro for unlimited coaching.
                     </Text>
                   </View>
                 </View>

@@ -70,7 +70,7 @@
     "@babel/core": "^7.29.0",
     "@expo/ngrok": "^4.1.0",
     "@types/react": "~19.1.10",
-    "eas-cli": "^16.32.0",
+    "eas-cli": "^0.0.0",
     "eslint": "^9.31.0",
     "eslint-config-expo": "~10.0.0",
     "rork": "^1.0.1",

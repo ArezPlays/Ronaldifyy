@@ -6,12 +6,12 @@ module.exports = function (api) {
       [
         "module-resolver",
         {
-          root: ["./app"],   // <-- points to app folder
+          root: ["./"],          // project root
           alias: {
-            "@": "./app"      // <-- same as root, so @/ works
-          }
-        }
-      ]
-    ]
+            "@": "./app"          // @/ → app folder
+          },
+        },
+      ],
+    ],
   };
 };

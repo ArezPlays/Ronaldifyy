@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "packageManager": "npm@10.8.2",
   "scripts": {
-    "start": "bunx rork start -p v7kyvdncg0nye94ekl366 --tunnel",
-    "start-web": "bunx rork start -p v7kyvdncg0nye94ekl366 --web --tunnel",
-    "start-web-dev": "DEBUG=expo* bunx rork start -p v7kyvdncg0nye94ekl366 --web --tunnel",
+    "start": "npx rork start -p v7kyvdncg0nye94ekl366 --tunnel",
+    "start-web": "npx rork start -p v7kyvdncg0nye94ekl366 --web --tunnel",
+    "start-web-dev": "DEBUG=expo* npx rork start -p v7kyvdncg0nye94ekl366 --web --tunnel",
     "lint": "expo lint",
     "android": "expo run:android",
     "ios": "expo run:ios"

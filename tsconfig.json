@@ -1,12 +1,13 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",            // root of project
-    "paths": {
-      "@/*": ["app/*"]         // @/ maps to app folder
-    },
+    "baseUrl": null,
     "strict": true,
-    "jsx": "react-jsx"
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
   },
   "include": [
     "**/*.ts",
